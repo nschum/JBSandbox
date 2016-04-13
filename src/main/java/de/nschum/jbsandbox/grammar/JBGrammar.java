@@ -10,13 +10,15 @@ public class JBGrammar implements Grammar {
     private List<GrammarRule> rules = new ArrayList<>();
 
     public JBGrammar() {
-        addRule(EXPR, EXPR, OP, EXPR);
-        addRule(EXPR, PAREN_OPEN, EXPR, PAREN_CLOSE);
-        addRule(EXPR, IDENTIFIER);
-        addRule(EXPR, BRACE_OPEN, EXPR, COMMA, EXPR, BRACE_CLOSE);
-        addRule(EXPR, NUMBER);
-        addRule(EXPR, KEYWORD_MAP, PAREN_OPEN, EXPR, COMMA, IDENTIFIER, ARROW, EXPR, PAREN_CLOSE);
-        addRule(EXPR, KEYWORD_REDUCE, PAREN_OPEN, EXPR, COMMA, EXPR, COMMA, IDENTIFIER, IDENTIFIER, ARROW, EXPR, PAREN_CLOSE);
+        addRule(EXPR, PAREN_OPEN, EXPR, PAREN_CLOSE, EXPR_CONTINUED);
+        addRule(EXPR, IDENTIFIER, EXPR_CONTINUED);
+        addRule(EXPR, BRACE_OPEN, EXPR, COMMA, EXPR, BRACE_CLOSE, EXPR_CONTINUED);
+        addRule(EXPR, NUMBER, EXPR_CONTINUED);
+        addRule(EXPR, KEYWORD_MAP, PAREN_OPEN, EXPR, COMMA, IDENTIFIER, ARROW, EXPR, PAREN_CLOSE, EXPR_CONTINUED);
+        addRule(EXPR, KEYWORD_REDUCE, PAREN_OPEN, EXPR, COMMA, EXPR, COMMA, IDENTIFIER, IDENTIFIER, ARROW, EXPR, PAREN_CLOSE, EXPR_CONTINUED);
+
+        addRule(EXPR_CONTINUED, OP, EXPR);
+        addRule(EXPR_CONTINUED, EPSILON);
 
         addRule(OP, PLUS);
         addRule(OP, MINUS);
@@ -28,8 +30,10 @@ public class JBGrammar implements Grammar {
         addRule(STMT, KEYWORD_OUT, EXPR);
         addRule(STMT, KEYWORD_PRINT, STRING);
 
-        addRule(PROGRAM, STMT);
-        addRule(PROGRAM, PROGRAM, STMT);
+        addRule(PROGRAM, STMT, PROGRAM_CONTINUED);
+
+        addRule(PROGRAM_CONTINUED, STMT, PROGRAM_CONTINUED);
+        addRule(PROGRAM_CONTINUED, EOF);
     }
 
     private void addRule(GrammarToken leftHandSide, GrammarToken... rightHandSide) {

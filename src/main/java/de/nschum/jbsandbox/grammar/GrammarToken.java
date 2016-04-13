@@ -2,9 +2,11 @@ package de.nschum.jbsandbox.grammar;
 
 public enum GrammarToken {
     EXPR,
+    EXPR_CONTINUED,
     OP,
     STMT,
     PROGRAM,
+    PROGRAM_CONTINUED,
 
     // shortcuts
     NUMBER,
@@ -12,6 +14,8 @@ public enum GrammarToken {
     IDENTIFIER,
 
     // terminal symbols
+    EPSILON, // empty word
+    EOF, // end of input
     PAREN_OPEN, // (
     PAREN_CLOSE, // )
     BRACE_OPEN, // {
