@@ -14,12 +14,23 @@ public class GrammarRule {
     private List<GrammarToken> rightHandSide;
 
     public GrammarRule(GrammarToken leftHandSide, List<GrammarToken> rightHandSide) {
+        if (rightHandSide.isEmpty()) {
+            throw new IllegalArgumentException("Right-hand side must not be empty, consider EPSILON");
+        }
         this.leftHandSide = leftHandSide;
         this.rightHandSide = rightHandSide;
     }
 
     public GrammarRule(GrammarToken leftHandSide, GrammarToken... rightHandSide) {
         this(leftHandSide, Arrays.asList(rightHandSide));
+    }
+
+    public GrammarToken getLeftHandSide() {
+        return leftHandSide;
+    }
+
+    public List<GrammarToken> getRightHandSide() {
+        return rightHandSide;
     }
 
     @Override
