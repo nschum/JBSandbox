@@ -1,12 +1,12 @@
 package de.nschum.jbsandbox.grammar;
 
 public enum GrammarToken {
-    EXPR,
-    EXPR_CONTINUED,
-    OP,
-    STMT,
-    PROGRAM,
-    PROGRAM_CONTINUED,
+    EXPR(false),
+    EXPR_CONTINUED(false),
+    OP(false),
+    STMT(false),
+    PROGRAM(false),
+    PROGRAM_CONTINUED(false),
 
     // shortcuts
     NUMBER,
@@ -32,5 +32,24 @@ public enum GrammarToken {
     KEYWORD_MAP,
     KEYWORD_REDUCE,
     KEYWORD_OUT,
-    KEYWORD_PRINT,
+    KEYWORD_PRINT;
+
+    private boolean terminal;
+
+    GrammarToken(boolean terminal) {
+        this.terminal = terminal;
+    }
+
+    GrammarToken() {
+        this(true);
+    }
+
+    /**
+     * Return if this is a token is a terminal, i.e. appears in the scanned input
+     * <p>
+     * A non-terminal is only used in the grammar.
+     */
+    public boolean isTerminal() {
+        return terminal;
+    }
 }
