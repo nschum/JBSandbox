@@ -7,8 +7,8 @@ import de.nschum.jbsandbox.grammar.GrammarToken;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static de.nschum.jbsandbox.grammar.GrammarToken.EOF;
-import static de.nschum.jbsandbox.grammar.GrammarToken.EPSILON;
+import static de.nschum.jbsandbox.grammar.Grammar.EOF;
+import static de.nschum.jbsandbox.grammar.Grammar.EPSILON;
 import static java.util.stream.Collectors.toSet;
 
 /**
@@ -24,7 +24,7 @@ class ParserFollowSets {
         assert grammar != null;
         assert firstSets != null;
 
-        for (GrammarToken token : GrammarToken.values()) {
+        for (GrammarToken token : grammar.getTokens()) {
             followSets.put(token, new HashSet<>());
         }
 

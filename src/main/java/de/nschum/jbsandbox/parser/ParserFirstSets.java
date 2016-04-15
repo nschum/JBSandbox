@@ -7,7 +7,7 @@ import de.nschum.jbsandbox.grammar.GrammarToken;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static de.nschum.jbsandbox.grammar.GrammarToken.EPSILON;
+import static de.nschum.jbsandbox.grammar.Grammar.EPSILON;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
@@ -25,7 +25,7 @@ class ParserFirstSets {
         assert grammar != null;
         this.grammar = grammar;
 
-        for (GrammarToken token : GrammarToken.values()) {
+        for (GrammarToken token : grammar.getTokens()) {
             final List<GrammarRule> rulesForToken =
                     grammar.getRules().stream()
                             .filter(rule -> rule.getLeftHandSide().equals(token))

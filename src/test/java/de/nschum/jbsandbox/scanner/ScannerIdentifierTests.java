@@ -5,7 +5,7 @@ import org.junit.Test;
 import java.util.List;
 
 import static de.nschum.jbsandbox.Matchers.contains;
-import static de.nschum.jbsandbox.grammar.GrammarToken.IDENTIFIER;
+import static de.nschum.jbsandbox.grammar.JBGrammar.IDENTIFIER;
 import static de.nschum.jbsandbox.scanner.ScannerTokenMatchers.token;
 import static org.junit.Assert.assertThat;
 

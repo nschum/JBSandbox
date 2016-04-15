@@ -1,6 +1,6 @@
 package de.nschum.jbsandbox.scanner;
 
-import static de.nschum.jbsandbox.grammar.GrammarToken.*;
+import static de.nschum.jbsandbox.grammar.JBGrammar.*;
 
 public class JBScanner extends Scanner {
 

@@ -12,7 +12,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static de.nschum.jbsandbox.grammar.GrammarToken.*;
+import static de.nschum.jbsandbox.grammar.Grammar.EOF;
+import static de.nschum.jbsandbox.grammar.Grammar.EPSILON;
+import static de.nschum.jbsandbox.parser.MockTokens.*;
 import static java.util.stream.Collectors.toSet;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
@@ -39,7 +41,7 @@ public class ParserFollowSetTests {
 
             @Override
             public GrammarToken getStartSymbol() {
-                return PROGRAM;
+                return S;
             }
         };
     }
@@ -55,57 +57,57 @@ public class ParserFollowSetTests {
         ParserFollowSets parserFollowSets = new ParserFollowSets(grammar, null);
 
         // then
-        assertThat(parserFollowSets.getFollowSet(PROGRAM), containsInAnyOrder(EOF));
+        assertThat(parserFollowSets.getFollowSet(S), containsInAnyOrder(EOF));
     }
 
     @Test
     public void followSetOfSymbolShouldBeFirstSetOfFollowingSymbol() {
         // given
-        mockFirstSet(OP, PLUS, MINUS);
-        mockFirstSet(STMT, STAR, SLASH);
-        GrammarRule rule1 = new GrammarRule(PROGRAM, EXPR, OP);
-        GrammarRule rule2 = new GrammarRule(PROGRAM, EXPR, STMT);
+        mockFirstSet(A, a, b);
+        mockFirstSet(B, c, d);
+        GrammarRule rule1 = new GrammarRule(C, D, A);
+        GrammarRule rule2 = new GrammarRule(C, D, B);
         Grammar grammar = mockGrammarWithRules(rule1, rule2);
 
         // when
         ParserFollowSets parserFollowSets = new ParserFollowSets(grammar, firstSetsMock);
 
         // then
-        assertThat(parserFollowSets.getFollowSet(EXPR), containsInAnyOrder(PLUS, MINUS, STAR, SLASH));
+        assertThat(parserFollowSets.getFollowSet(D), containsInAnyOrder(a, b, c, d));
     }
 
     @Test
     public void followSetShouldInheritLeftHandSidesFollowSetIfLastSymbolInRule() {
         // given
-        mockFirstSet(OP, PLUS, MINUS);
-        mockFirstSet(STMT, STAR, SLASH);
-        GrammarRule rule1 = new GrammarRule(PROGRAM, EXPR, OP);
-        GrammarRule rule2 = new GrammarRule(PROGRAM, EXPR, STMT);
-        GrammarRule rule3 = new GrammarRule(EXPR, EXPR_CONTINUED);
+        mockFirstSet(A, a, b);
+        mockFirstSet(B, c, d);
+        GrammarRule rule1 = new GrammarRule(C, D, A);
+        GrammarRule rule2 = new GrammarRule(C, D, B);
+        GrammarRule rule3 = new GrammarRule(D, F);
         Grammar grammar = mockGrammarWithRules(rule1, rule2, rule3);
 
         // when
         ParserFollowSets parserFollowSets = new ParserFollowSets(grammar, firstSetsMock);
 
         // then
-        assertThat(parserFollowSets.getFollowSet(EXPR_CONTINUED), containsInAnyOrder(PLUS, MINUS, STAR, SLASH));
+        assertThat(parserFollowSets.getFollowSet(F), containsInAnyOrder(a, b, c, d));
     }
 
     @Test
     public void followSetShouldInheritLeftHandSidesFollowSetIfOnlyEpsilonsFollow() {
         // given
-        mockFirstSet(OP, PLUS, MINUS);
-        mockFirstSet(STMT, STAR, SLASH);
-        mockFirstSet(PROGRAM_CONTINUED, EPSILON);
-        GrammarRule rule1 = new GrammarRule(PROGRAM, EXPR, OP);
-        GrammarRule rule2 = new GrammarRule(PROGRAM, EXPR, STMT);
-        GrammarRule rule3 = new GrammarRule(EXPR, EXPR_CONTINUED, PROGRAM_CONTINUED);
+        mockFirstSet(A, a, b);
+        mockFirstSet(B, c, d);
+        mockFirstSet(C, EPSILON);
+        GrammarRule rule1 = new GrammarRule(D, E, A);
+        GrammarRule rule2 = new GrammarRule(D, E, B);
+        GrammarRule rule3 = new GrammarRule(E, F, C);
         Grammar grammar = mockGrammarWithRules(rule1, rule2, rule3);
 
         // when
         ParserFollowSets parserFollowSets = new ParserFollowSets(grammar, firstSetsMock);
 
         // then
-        assertThat(parserFollowSets.getFollowSet(EXPR_CONTINUED), containsInAnyOrder(PLUS, MINUS, STAR, SLASH));
+        assertThat(parserFollowSets.getFollowSet(F), containsInAnyOrder(a, b, c, d));
     }
 }

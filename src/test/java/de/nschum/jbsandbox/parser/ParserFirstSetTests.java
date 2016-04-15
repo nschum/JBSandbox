@@ -8,7 +8,8 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.List;
 
-import static de.nschum.jbsandbox.grammar.GrammarToken.*;
+import static de.nschum.jbsandbox.grammar.Grammar.EPSILON;
+import static de.nschum.jbsandbox.parser.MockTokens.*;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
 
@@ -25,7 +26,7 @@ public class ParserFirstSetTests {
 
             @Override
             public GrammarToken getStartSymbol() {
-                return PROGRAM;
+                return S;
             }
         };
     }
@@ -35,56 +36,56 @@ public class ParserFirstSetTests {
     @Test
     public void shouldIncludeDirectTokenInFirstSet() {
         // given
-        GrammarRule rule = new GrammarRule(OP, PLUS, MINUS);
+        GrammarRule rule = new GrammarRule(A, a, b);
         Grammar grammar = mockGrammarWithRules(rule);
 
         // when
         ParserFirstSets parserFirstSets = new ParserFirstSets(grammar);
 
         // then
-        assertThat(parserFirstSets.getFirstSet(rule), containsInAnyOrder(PLUS));
-        assertThat(parserFirstSets.getFirstSet(OP), containsInAnyOrder(PLUS));
+        assertThat(parserFirstSets.getFirstSet(rule), containsInAnyOrder(a));
+        assertThat(parserFirstSets.getFirstSet(A), containsInAnyOrder(a));
     }
 
     @Test
     public void shouldIncludeIndirectTokensInFirstSet() {
         // given
-        GrammarRule rule1 = new GrammarRule(STMT, OP);
-        GrammarRule rule2 = new GrammarRule(OP, PLUS, STAR);
-        GrammarRule rule3 = new GrammarRule(OP, MINUS, SLASH);
+        GrammarRule rule1 = new GrammarRule(A, B);
+        GrammarRule rule2 = new GrammarRule(B, a, b);
+        GrammarRule rule3 = new GrammarRule(B, c, d);
         Grammar grammar = mockGrammarWithRules(rule1, rule2, rule3);
 
         // when
         ParserFirstSets parserFirstSets = new ParserFirstSets(grammar);
 
         // then
-        assertThat(parserFirstSets.getFirstSet(rule1), containsInAnyOrder(PLUS, MINUS));
-        assertThat(parserFirstSets.getFirstSet(STMT), containsInAnyOrder(PLUS, MINUS));
+        assertThat(parserFirstSets.getFirstSet(rule1), containsInAnyOrder(a, c));
+        assertThat(parserFirstSets.getFirstSet(A), containsInAnyOrder(a, c));
     }
 
     @Test
     public void shouldSkipEpsilonInFirstSet() {
         // given
-        GrammarRule rule1 = new GrammarRule(STMT, EXPR, OP);
-        GrammarRule rule2 = new GrammarRule(EXPR, EPSILON);
-        GrammarRule rule3 = new GrammarRule(OP, PLUS, STAR);
-        GrammarRule rule4 = new GrammarRule(OP, MINUS, SLASH);
+        GrammarRule rule1 = new GrammarRule(A, B, C);
+        GrammarRule rule2 = new GrammarRule(B, EPSILON);
+        GrammarRule rule3 = new GrammarRule(C, a, b);
+        GrammarRule rule4 = new GrammarRule(C, c, d);
         Grammar grammar = mockGrammarWithRules(rule1, rule2, rule3, rule4);
 
         // when
         ParserFirstSets parserFirstSets = new ParserFirstSets(grammar);
 
         // then
-        assertThat(parserFirstSets.getFirstSet(rule1), containsInAnyOrder(PLUS, MINUS));
-        assertThat(parserFirstSets.getFirstSet(STMT), containsInAnyOrder(PLUS, MINUS));
+        assertThat(parserFirstSets.getFirstSet(rule1), containsInAnyOrder(a, c));
+        assertThat(parserFirstSets.getFirstSet(A), containsInAnyOrder(a, c));
     }
 
     @Test
     public void shouldIncludeEpsilonIfNoOtherTokens() {
         // given
-        GrammarRule rule1 = new GrammarRule(STMT, EXPR, OP);
-        GrammarRule rule2 = new GrammarRule(EXPR, EPSILON);
-        GrammarRule rule3 = new GrammarRule(OP, EPSILON);
+        GrammarRule rule1 = new GrammarRule(A, B, C);
+        GrammarRule rule2 = new GrammarRule(B, EPSILON);
+        GrammarRule rule3 = new GrammarRule(C, EPSILON);
         Grammar grammar = mockGrammarWithRules(rule1, rule2, rule3);
 
         // when
@@ -92,6 +93,6 @@ public class ParserFirstSetTests {
 
         // then
         assertThat(parserFirstSets.getFirstSet(rule1), containsInAnyOrder(EPSILON));
-        assertThat(parserFirstSets.getFirstSet(STMT), containsInAnyOrder(EPSILON));
+        assertThat(parserFirstSets.getFirstSet(A), containsInAnyOrder(EPSILON));
     }
 }

@@ -1,47 +1,26 @@
 package de.nschum.jbsandbox.grammar;
 
-public enum GrammarToken {
-    EXPR(false),
-    EXPR_CONTINUED(false),
-    OP(false),
-    STMT(false),
-    PROGRAM(false),
-    PROGRAM_CONTINUED(false),
+public class GrammarToken {
 
-    // shortcuts
-    NUMBER,
-    STRING,
-    IDENTIFIER,
-
-    // terminal symbols
-    EPSILON, // empty word
-    EOF, // end of input
-    PAREN_OPEN, // (
-    PAREN_CLOSE, // )
-    BRACE_OPEN, // {
-    BRACE_CLOSE, // }
-    COMMA, // ,
-    ARROW, // ->
-    PLUS, // +
-    MINUS, // -
-    STAR, // *
-    SLASH, // /
-    HAT, // ^
-    EQUALS, // =
-    KEYWORD_VAR,
-    KEYWORD_MAP,
-    KEYWORD_REDUCE,
-    KEYWORD_OUT,
-    KEYWORD_PRINT;
-
+    private String name;
     private boolean terminal;
 
-    GrammarToken(boolean terminal) {
+    public static GrammarToken terminal(String name) {
+        return new GrammarToken(name, true);
+    }
+
+    public static GrammarToken nonTerminal(String name) {
+        return new GrammarToken(name, false);
+    }
+
+    private GrammarToken(String name, boolean terminal) {
+        assert name != null;
+        this.name = name;
         this.terminal = terminal;
     }
 
-    GrammarToken() {
-        this(true);
+    public String getName() {
+        return name;
     }
 
     /**
@@ -51,5 +30,25 @@ public enum GrammarToken {
      */
     public boolean isTerminal() {
         return terminal;
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        GrammarToken grammarToken = (GrammarToken) o;
+
+        return terminal == grammarToken.terminal && name == grammarToken.name;
+    }
+
+    @Override
+    public int hashCode() {
+        return name.hashCode();
     }
 }
