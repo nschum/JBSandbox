@@ -49,6 +49,10 @@ public class ParserTree {
         return content;
     }
 
+    public ParserTree getChild(int i) {
+        return children.get(i);
+    }
+
     public List<ParserTree> getChildren() {
         return children;
     }
