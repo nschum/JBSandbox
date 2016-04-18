@@ -44,36 +44,36 @@ public class JBGrammar implements Grammar {
 
     private List<GrammarRule> rules = new ArrayList<>();
 
-    public JBGrammar() {
-        addRule(EXPR, PAREN_OPEN, EXPR, PAREN_CLOSE, EXPR_CONTINUED);
-        addRule(EXPR, IDENTIFIER, EXPR_CONTINUED);
-        addRule(EXPR, BRACE_OPEN, EXPR, COMMA, EXPR, BRACE_CLOSE, EXPR_CONTINUED);
-        addRule(EXPR, NUMBER, EXPR_CONTINUED);
-        addRule(EXPR, KEYWORD_MAP, PAREN_OPEN, EXPR, COMMA, IDENTIFIER, ARROW, EXPR, PAREN_CLOSE, EXPR_CONTINUED);
-        addRule(EXPR, KEYWORD_REDUCE, PAREN_OPEN, EXPR, COMMA, EXPR, COMMA, IDENTIFIER, IDENTIFIER, ARROW, EXPR, PAREN_CLOSE, EXPR_CONTINUED);
-        addRule(EXPR, MINUS, NUMBER, EXPR_CONTINUED);
+    public final GrammarRule ruleParentheses = addRule(EXPR, PAREN_OPEN, EXPR, PAREN_CLOSE, EXPR_CONTINUED);
+    public final GrammarRule ruleReference = addRule(EXPR, IDENTIFIER, EXPR_CONTINUED);
+    public final GrammarRule ruleRange = addRule(EXPR, BRACE_OPEN, EXPR, COMMA, EXPR, BRACE_CLOSE, EXPR_CONTINUED);
+    public final GrammarRule ruleNumber = addRule(EXPR, NUMBER, EXPR_CONTINUED);
+    public final GrammarRule ruleMap = addRule(EXPR, KEYWORD_MAP, PAREN_OPEN, EXPR, COMMA, IDENTIFIER, ARROW, EXPR, PAREN_CLOSE, EXPR_CONTINUED);
+    public final GrammarRule ruleReduce = addRule(EXPR, KEYWORD_REDUCE, PAREN_OPEN, EXPR, COMMA, EXPR, COMMA, IDENTIFIER, IDENTIFIER, ARROW, EXPR, PAREN_CLOSE, EXPR_CONTINUED);
+    public final GrammarRule ruleNegate = addRule(EXPR, MINUS, NUMBER, EXPR_CONTINUED);
 
-        addRule(EXPR_CONTINUED, OP, EXPR);
-        addRule(EXPR_CONTINUED, EPSILON);
+    public final GrammarRule ruleOperator = addRule(EXPR_CONTINUED, OP, EXPR);
+    public final GrammarRule ruleNoOperator = addRule(EXPR_CONTINUED, EPSILON);
 
-        addRule(OP, PLUS);
-        addRule(OP, MINUS);
-        addRule(OP, STAR);
-        addRule(OP, SLASH);
-        addRule(OP, HAT);
+    public final GrammarRule rulePlus = addRule(OP, PLUS);
+    public final GrammarRule ruleMinus = addRule(OP, MINUS);
+    public final GrammarRule ruleMultiply = addRule(OP, STAR);
+    public final GrammarRule ruleDivide = addRule(OP, SLASH);
+    public final GrammarRule ruleExp = addRule(OP, HAT);
 
-        addRule(STMT, KEYWORD_VAR, IDENTIFIER, EQUALS, EXPR);
-        addRule(STMT, KEYWORD_OUT, EXPR);
-        addRule(STMT, KEYWORD_PRINT, STRING);
+    public final GrammarRule ruleDeclaration = addRule(STMT, KEYWORD_VAR, IDENTIFIER, EQUALS, EXPR);
+    public final GrammarRule ruleOutStatement = addRule(STMT, KEYWORD_OUT, EXPR);
+    public final GrammarRule rulePrintStatement = addRule(STMT, KEYWORD_PRINT, STRING);
 
-        addRule(PROGRAM, STMT, PROGRAM_CONTINUED);
+    public final GrammarRule ruleFirstStatement = addRule(PROGRAM, STMT, PROGRAM_CONTINUED);
 
-        addRule(PROGRAM_CONTINUED, STMT, PROGRAM_CONTINUED);
-        addRule(PROGRAM_CONTINUED, EOF);
-    }
+    public final GrammarRule ruleFurtherStatements = addRule(PROGRAM_CONTINUED, STMT, PROGRAM_CONTINUED);
+    public final GrammarRule ruleEof = addRule(PROGRAM_CONTINUED, EOF);
 
-    private void addRule(GrammarToken leftHandSide, GrammarToken... rightHandSide) {
-        rules.add(new GrammarRule(leftHandSide, rightHandSide));
+    private GrammarRule addRule(GrammarToken leftHandSide, GrammarToken... rightHandSide) {
+        final GrammarRule rule = new GrammarRule(leftHandSide, rightHandSide);
+        rules.add(rule);
+        return rule;
     }
 
     @Override
