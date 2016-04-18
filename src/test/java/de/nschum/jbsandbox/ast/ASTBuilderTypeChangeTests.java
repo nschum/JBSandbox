@@ -30,6 +30,20 @@ public class ASTBuilderTypeChangeTests extends ASTBuilderBaseTests {
     }
 
     @Test
+    public void shouldPromoteCorrectSubexpressionInRewrittenTrees() throws Exception {
+        Expression expression = parseExpression("1.0 * 1 + 1");
+
+        assertThat(expression, hasProperty("type", equalTo(Type.FLOAT)));
+    }
+
+    @Test
+    public void shouldUndoPromotionInFormerRootInRewrittenTrees() throws Exception {
+        Expression expression = parseExpression("1 * 1 + 1.0");
+
+        assertThat(expression, hasProperty("leftHandSide", hasProperty("type", equalTo(Type.INT))));
+    }
+
+    @Test
     public void shouldBeAbleToMapToFloatSequence() throws Exception {
         final Expression expression = parseExpression("map({1, 5}, i -> i * 2.0)");
 

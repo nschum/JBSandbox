@@ -124,9 +124,11 @@ public class ASTBuilderExpressionTests extends ASTBuilderBaseTests {
     public void shouldIgnoreRedundantParentheses() throws Exception {
         Expression expression = parseExpression("(42.0)");
 
-        assertThat(expression, instanceOf(FloatLiteral.class));
-        assertThat(expression, hasProperty("type", equalTo(Type.FLOAT)));
-        assertThat(expression, hasProperty("content", equalTo(42.0)));
+        assertThat(expression, instanceOf(ParenthesizedExpression.class));
+        assertThat(expression, hasProperty("expression", allOf(
+                instanceOf(FloatLiteral.class),
+                hasProperty("type", equalTo(Type.FLOAT)),
+                hasProperty("content", equalTo(42.0)))));
     }
 
     @Test

@@ -52,7 +52,7 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
 
         ParserTree expressionTree = parserTree.getChild(1);
 
-        return parseExpression(expressionTree, scope);
+        return new ParenthesizedExpression(parseExpression(expressionTree, scope));
     }
 
     private Expression parseRuleReference(ParserTree parserTree, Scope scope) {
@@ -176,7 +176,8 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
             reportError(new TypeError());
         }
 
-        return new OperationExpression(type, leftHandExpression, rightHandExpression, operation);
+        OperationExpression result = new OperationExpression(type, leftHandExpression, rightHandExpression, operation);
+        return new OperatorPrecedenceSyntaxTreeRewriter().reorderOperations(result);
     }
 
     private Expression parseRuleNoOperator(ParserTree parserTree, Expression expression) {
