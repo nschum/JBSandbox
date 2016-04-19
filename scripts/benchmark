@@ -1,0 +1,8 @@
+#!/bin/bash -eu
+# Benchmarks JBSandboxRunner with sample scripts
+
+mvn install
+echo
+echo "Running samples/pi.jb…"
+echo
+time java -cp target/JBSandbox-1.0-SNAPSHOT.jar de.nschum.jbsandbox.JBSandboxRunner samples/pi.jb

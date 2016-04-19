@@ -1,0 +1,9 @@
+#!/bin/bash -eu
+# Evaluates a program passed as arguments
+# ./scripts/eval 'print "hello world"'
+
+mvn install
+echo
+echo "Running…"
+echo
+echo "$*" | java -cp target/JBSandbox-1.0-SNAPSHOT.jar de.nschum.jbsandbox.JBSandboxRunner -
