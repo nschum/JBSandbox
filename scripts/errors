@@ -1,0 +1,10 @@
+#!/bin/bash -eu
+# Try JBSandboxRunner with error scripts
+
+mvn install
+
+for file in samples/error-*.jb; do
+    echo
+    echo "$file"…
+    java -cp target/JBSandbox-1.0-SNAPSHOT.jar de.nschum.jbsandbox.JBSandboxRunner "$file"
+done
