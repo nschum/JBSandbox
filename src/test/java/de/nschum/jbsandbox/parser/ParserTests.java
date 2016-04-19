@@ -28,13 +28,16 @@ public class ParserTests {
         return hasProperty("rule", equalTo(rule));
     }
 
-    private Matcher<ParserTree> parserTreeWithToken(GrammarToken token) {
+    private Matcher<ParserTree> parserTreeWithToken(GrammarToken token, int column) {
         if (token.isTerminal()) {
             return allOf(
                     hasProperty("token", equalTo(token)),
+                    hasProperty("location", equalTo(new SourceLocation(0, column))),
                     hasProperty("content", equalTo(Optional.of(token.toString()))));
         } else {
-            return hasProperty("token", equalTo(token));
+            return allOf(
+                    hasProperty("token", equalTo(token)),
+                    hasProperty("location", equalTo(new SourceLocation(0, column))));
         }
     }
 
@@ -87,8 +90,8 @@ public class ParserTests {
         final ParserTree parserTree = parser.parse(mockScannerTokens(a, b));
         assertThat(parserTree, parserTreeWithRule(rule));
         assertThat(parserTree, parserTreeWithChildren(
-                parserTreeWithToken(a),
-                parserTreeWithToken(b)
+                parserTreeWithToken(a, 0),
+                parserTreeWithToken(b, 1)
         ));
     }
 
@@ -106,12 +109,12 @@ public class ParserTests {
         final ParserTree parserTree = parser.parse(mockScannerTokens(a, b, c));
         assertThat(parserTree, parserTreeWithRule(rule1));
         assertThat(parserTree, parserTreeWithChildren(
-                parserTreeWithToken(a),
+                parserTreeWithToken(a, 0),
                 allOf(
-                        parserTreeWithToken(B),
+                        parserTreeWithToken(B, 1),
                         parserTreeWithRule(rule2),
-                        parserTreeWithChildren(parserTreeWithToken(b))),
-                parserTreeWithToken(c)
+                        parserTreeWithChildren(parserTreeWithToken(b, 1))),
+                parserTreeWithToken(c, 2)
         ));
     }
 
@@ -129,12 +132,12 @@ public class ParserTests {
         final ParserTree parserTree = parser.parse(mockScannerTokens(a, c));
         assertThat(parserTree, parserTreeWithRule(rule1));
         assertThat(parserTree, parserTreeWithChildren(
-                parserTreeWithToken(a),
+                parserTreeWithToken(a, 0),
                 allOf(
-                        parserTreeWithToken(B),
+                        parserTreeWithToken(B, 1),
                         parserTreeWithRule(rule2),
                         parserTreeWithChildren(empty())),
-                parserTreeWithToken(c)
+                parserTreeWithToken(c, 1)
         ));
     }
 

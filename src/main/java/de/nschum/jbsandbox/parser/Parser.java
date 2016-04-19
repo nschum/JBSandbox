@@ -42,6 +42,7 @@ public class Parser {
                 // process terminal and remove it from input
                 ParserTree output = stack.pop();
                 output.setContent(Optional.of(nextToken.getContent()));
+                output.setLocation(nextToken.getLocation());
                 nextToken = unreadTokens.next();
             } else {
                 // apply rule and rewrite stack

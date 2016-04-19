@@ -31,7 +31,7 @@ public class JBSandboxRunner {
 
         try {
             List<ASTError> errors = run(createReader(path));
-            printErrors(errors);
+            printErrors(errors, path);
         } catch (IOException e) {
             System.err.println("Could not read: " + e.getMessage());
         } catch (IllegalTokenException e) {
@@ -60,9 +60,9 @@ public class JBSandboxRunner {
         System.err.println("  FILE:\tThe file to parse or \"-\" for reading a program from stdin");
     }
 
-    private static void printErrors(List<ASTError> errors) {
+    private static void printErrors(List<ASTError> errors, String path) {
         for (ASTError error : errors) {
-            System.err.println("Parse error");
+            System.err.println("Parse error: " + humanReadableLocation(path, error.getLocation()));
         }
     }
 

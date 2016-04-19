@@ -1,5 +1,6 @@
 package de.nschum.jbsandbox.ast;
 
+import de.nschum.jbsandbox.SourceLocation;
 import de.nschum.jbsandbox.grammar.GrammarRule;
 import de.nschum.jbsandbox.grammar.JBGrammar;
 import de.nschum.jbsandbox.parser.ParserTree;
@@ -63,7 +64,7 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
         final String variableName = identifierTree.getContent().get();
         Optional<Variable> referencedVariable = scope.lookUp(variableName);
         if (!referencedVariable.isPresent()) {
-            reportError(new UnresolvedVariableError());
+            reportError(new UnresolvedVariableError(parserTree.getLocation()));
         }
 
         return new Reference(referencedVariable.orElse(new Variable(Type.UNDETERMINED, variableName)));
@@ -79,7 +80,7 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
         Expression upperBound = parseExpression(upperBoundTree, scope);
 
         if (!lowerBound.getType().equals(Type.INT) || !upperBound.getType().equals(Type.INT)) {
-            reportError(new TypeError());
+            reportError(new TypeError(parserTree.getLocation()));
         }
 
         return new IntRangeExpression(lowerBound, upperBound);
@@ -102,7 +103,7 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
 
         Expression input = parseExpression(inputTree, scope);
         if (!input.getType().isSequence()) {
-            reportError(new TypeError());
+            reportError(new TypeError(parserTree.getLocation()));
         }
         Type innerType = input.getType().getInnerType();
         Variable parameter = new Variable(innerType, parameterTree.getContent().get());
@@ -124,16 +125,16 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
 
         Expression input = parseExpression(inputTree, scope);
         Expression initialValue = parseExpression(initialValueTree, scope);
-        Type type = promoteTypes(initialValue.getType(), input.getType().getInnerType());
+        Type type = promoteTypes(initialValue.getType(), input.getType().getInnerType(), parserTree.getLocation());
         if (!input.getType().isSequence()) {
-            reportError(new TypeError());
+            reportError(new TypeError(parserTree.getLocation()));
         }
         Variable parameter1 = new Variable(type, parameterTree1.getContent().get());
         Variable parameter2 = new Variable(type, parameterTree2.getContent().get());
 
         Expression lambda = parseExpression(expressionTree, scope.addVariable(parameter1).addVariable(parameter2));
         if (!type.canBeAssignedFrom(lambda.getType())) {
-            reportError(new TypeError());
+            reportError(new TypeError(parserTree.getLocation()));
         }
 
         final Lambda function = new Lambda(Arrays.asList(parameter1, parameter2), lambda);
@@ -171,9 +172,10 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
         Operation operation = parseOperation(operationTree);
         Expression rightHandExpression = parseExpression(rightHandExpressionTree, scope);
 
-        Type type = promoteTypes(leftHandExpression.getType(), rightHandExpression.getType());
+        Type type =
+                promoteTypes(leftHandExpression.getType(), rightHandExpression.getType(), operationTree.getLocation());
         if (!type.canPerformArithmetic()) {
-            reportError(new TypeError());
+            reportError(new TypeError(parserTree.getLocation()));
         }
 
         OperationExpression result = new OperationExpression(type, leftHandExpression, rightHandExpression, operation);
@@ -186,7 +188,7 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
         return expression;
     }
 
-    private Type promoteTypes(Type type1, Type type2) {
+    private Type promoteTypes(Type type1, Type type2, SourceLocation location) {
         if (type1.equals(Type.UNDETERMINED) || type2.equals(Type.UNDETERMINED)) {
             return Type.UNDETERMINED;
         } else if (type1.canBeAssignedFrom(type2)) {
@@ -194,7 +196,7 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
         } else if (type2.canBeAssignedFrom(type1)) {
             return type2;
         } else {
-            reportError(new TypeError());
+            reportError(new TypeError(location));
             return Type.UNDETERMINED;
         }
     }
