@@ -1,6 +1,7 @@
 package de.nschum.jbsandbox.parser;
 
 import de.nschum.jbsandbox.SourceLocation;
+import de.nschum.jbsandbox.SourceRange;
 import de.nschum.jbsandbox.grammar.Grammar;
 import de.nschum.jbsandbox.grammar.GrammarRule;
 import de.nschum.jbsandbox.grammar.GrammarToken;
@@ -42,7 +43,9 @@ public class Parser {
                 // skip epsilon
                 ParserTree output = stack.pop();
                 output.setContent(Optional.of(""));
-                output.setLocation(nextToken.getLocation());
+                // has empty length
+                SourceLocation location = nextToken.getLocation().getStart();
+                output.setLocation(new SourceRange(location, location));
             } else if (stack.peek().getToken().equals(nextToken.getGrammarToken())) {
                 // process terminal and remove it from input
                 ParserTree output = stack.pop();
@@ -88,7 +91,8 @@ public class Parser {
      */
     private Iterator<ScannerToken> iterateWithEOF(List<ScannerToken> tokens) {
         List<ScannerToken> tokensWithEOF = new ArrayList<>(tokens);
-        tokensWithEOF.add(new ScannerToken(EOF, "", new SourceLocation(0, 0)));
+        SourceLocation eofLocation = tokens.get(tokens.size() - 1).getLocation().getEnd();
+        tokensWithEOF.add(new ScannerToken(EOF, "", new SourceRange(eofLocation, eofLocation)));
         return tokensWithEOF.iterator();
     }
 

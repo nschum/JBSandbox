@@ -1,6 +1,6 @@
 package de.nschum.jbsandbox.ast;
 
-import de.nschum.jbsandbox.SourceLocation;
+import de.nschum.jbsandbox.SourceRange;
 import de.nschum.jbsandbox.grammar.GrammarRule;
 import de.nschum.jbsandbox.grammar.JBGrammar;
 import de.nschum.jbsandbox.parser.ParserTree;
@@ -188,7 +188,7 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
         return expression;
     }
 
-    private Type promoteTypes(Type type1, Type type2, SourceLocation location) {
+    private Type promoteTypes(Type type1, Type type2, SourceRange location) {
         if (type1.equals(Type.UNDETERMINED) || type2.equals(Type.UNDETERMINED)) {
             return Type.UNDETERMINED;
         } else if (type1.canBeAssignedFrom(type2)) {

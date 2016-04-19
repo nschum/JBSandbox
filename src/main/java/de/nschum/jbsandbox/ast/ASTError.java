@@ -1,20 +1,20 @@
 package de.nschum.jbsandbox.ast;
 
-import de.nschum.jbsandbox.SourceLocation;
+import de.nschum.jbsandbox.SourceRange;
 
 /**
  * An error created during semantic analysis when creating the AST from the ParserTree
  */
 public abstract class ASTError {
 
-    private SourceLocation location;
+    private SourceRange location;
 
-    public ASTError(SourceLocation location) {
+    public ASTError(SourceRange location) {
         assert location != null;
         this.location = location;
     }
 
-    public SourceLocation getLocation() {
+    public SourceRange getLocation() {
         return location;
     }
 }

@@ -66,8 +66,18 @@ public class JBSandboxRunner {
         }
     }
 
+    private static String humanReadableLocation(SourceLocation location) {
+        return (location.getLine() + 1) + ":" + (location.getColumn() + 1);
+    }
+
     private static String humanReadableLocation(String path, SourceLocation location) {
-        return new File(path).getName() + ":" + (location.getLine() + 1) + ":" + (location.getColumn() + 1);
+        return new File(path).getName() + ":" + humanReadableLocation(location);
+    }
+
+    private static String humanReadableLocation(String path, SourceRange location) {
+        return new File(path).getName() + ":"
+                + humanReadableLocation(location.getStart()) + "-"
+                + humanReadableLocation(location.getEnd());
     }
 
     private static List<ASTError> run(Reader input)

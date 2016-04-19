@@ -1,6 +1,7 @@
 package de.nschum.jbsandbox.scanner;
 
 import de.nschum.jbsandbox.SourceLocation;
+import de.nschum.jbsandbox.SourceRange;
 import de.nschum.jbsandbox.grammar.GrammarToken;
 
 import java.io.Reader;
@@ -94,7 +95,11 @@ public class Scanner {
             // Which sub-pattern caused the match? That's the token we are looking for.
             assert matcher.groupCount() == tokens.size();
             int group = findNonEmptyMatchGroup(matcher);
-            output.add(new ScannerToken(tokens.get(group - 1), matcher.group(group), location));
+
+            int length = matcher.end(group) - matcher.start(group);
+            SourceRange range = new SourceRange(location, new SourceLocation(lineNumber, column + length));
+
+            output.add(new ScannerToken(tokens.get(group - 1), matcher.group(group), range));
             column = matcher.end(group);
         }
     }

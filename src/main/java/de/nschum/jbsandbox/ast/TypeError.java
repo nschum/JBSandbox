@@ -1,13 +1,13 @@
 package de.nschum.jbsandbox.ast;
 
-import de.nschum.jbsandbox.SourceLocation;
+import de.nschum.jbsandbox.SourceRange;
 
 /**
  * An error about incompatible types in the syntax tree
  */
 public class TypeError extends ASTError {
 
-    public TypeError(SourceLocation location) {
+    public TypeError(SourceRange location) {
         super(location);
     }
 }

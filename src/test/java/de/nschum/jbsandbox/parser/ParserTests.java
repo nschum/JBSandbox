@@ -1,6 +1,6 @@
 package de.nschum.jbsandbox.parser;
 
-import de.nschum.jbsandbox.SourceLocation;
+import de.nschum.jbsandbox.SourceRange;
 import de.nschum.jbsandbox.grammar.Grammar;
 import de.nschum.jbsandbox.grammar.GrammarRule;
 import de.nschum.jbsandbox.grammar.GrammarToken;
@@ -28,16 +28,16 @@ public class ParserTests {
         return hasProperty("rule", equalTo(rule));
     }
 
-    private Matcher<ParserTree> parserTreeWithToken(GrammarToken token, int column) {
+    private Matcher<ParserTree> parserTreeWithToken(GrammarToken token, int startColumn, int endColumn) {
         if (token.isTerminal() && !token.equals(EPSILON)) {
             return allOf(
                     hasProperty("token", equalTo(token)),
-                    hasProperty("location", equalTo(new SourceLocation(0, column))),
+                    hasProperty("location", equalTo(new SourceRange(0, startColumn, 0, endColumn))),
                     hasProperty("content", equalTo(Optional.of(token.toString()))));
         } else {
             return allOf(
                     hasProperty("token", equalTo(token)),
-                    hasProperty("location", equalTo(new SourceLocation(0, column))));
+                    hasProperty("location", equalTo(new SourceRange(0, startColumn, 0, endColumn))));
         }
     }
 
@@ -70,7 +70,8 @@ public class ParserTests {
         return IntStream.range(0, grammarTokens.length)
                 .mapToObj(i -> {
                     final GrammarToken token = grammarTokens[i];
-                    return new ScannerToken(token, token.toString(), new SourceLocation(0, i));
+                    SourceRange location = new SourceRange(0, i, 0, i + 1);
+                    return new ScannerToken(token, token.toString(), location);
                 })
                 .collect(toList());
     }
@@ -90,8 +91,8 @@ public class ParserTests {
         final ParserTree parserTree = parser.parse(mockScannerTokens(a, b));
         assertThat(parserTree, parserTreeWithRule(rule));
         assertThat(parserTree, parserTreeWithChildren(
-                parserTreeWithToken(a, 0),
-                parserTreeWithToken(b, 1)
+                parserTreeWithToken(a, 0, 1),
+                parserTreeWithToken(b, 1, 2)
         ));
     }
 
@@ -109,12 +110,12 @@ public class ParserTests {
         final ParserTree parserTree = parser.parse(mockScannerTokens(a, b, c));
         assertThat(parserTree, parserTreeWithRule(rule1));
         assertThat(parserTree, parserTreeWithChildren(
-                parserTreeWithToken(a, 0),
+                parserTreeWithToken(a, 0, 1),
                 allOf(
-                        parserTreeWithToken(B, 1),
+                        parserTreeWithToken(B, 1, 2),
                         parserTreeWithRule(rule2),
-                        parserTreeWithChildren(parserTreeWithToken(b, 1))),
-                parserTreeWithToken(c, 2)
+                        parserTreeWithChildren(parserTreeWithToken(b, 1, 2))),
+                parserTreeWithToken(c, 2, 3)
         ));
     }
 
@@ -132,12 +133,12 @@ public class ParserTests {
         final ParserTree parserTree = parser.parse(mockScannerTokens(a, c));
         assertThat(parserTree, parserTreeWithRule(rule1));
         assertThat(parserTree, parserTreeWithChildren(
-                parserTreeWithToken(a, 0),
+                parserTreeWithToken(a, 0, 1),
                 allOf(
-                        parserTreeWithToken(B, 1),
+                        parserTreeWithToken(B, 1, 1),
                         parserTreeWithRule(rule2),
-                        parserTreeWithChildren(parserTreeWithToken(EPSILON, 1))),
-                parserTreeWithToken(c, 1)
+                        parserTreeWithChildren(parserTreeWithToken(EPSILON, 1, 1))),
+                parserTreeWithToken(c, 1, 2)
         ));
     }
 
@@ -155,7 +156,7 @@ public class ParserTests {
             parser.parse(mockScannerTokens(b));
         } catch (UnexpectedTokenException e) {
             assertThat(e.getMessage(), equalTo("No rule for parsing b"));
-            assertThat(e.getLocation(), equalTo(new SourceLocation(0, 0)));
+            assertThat(e.getLocation(), equalTo(new SourceRange(0, 0, 0, 1)));
             throw e;
         }
     }
@@ -174,7 +175,7 @@ public class ParserTests {
             parser.parse(mockScannerTokens(a, b));
         } catch (UnexpectedTokenException e) {
             assertThat(e.getMessage(), equalTo("No rule for parsing b"));
-            assertThat(e.getLocation(), equalTo(new SourceLocation(0, 1)));
+            assertThat(e.getLocation(), equalTo(new SourceRange(0, 1, 0, 2)));
             throw e;
         }
     }

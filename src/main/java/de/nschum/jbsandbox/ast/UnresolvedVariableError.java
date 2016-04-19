@@ -1,13 +1,13 @@
 package de.nschum.jbsandbox.ast;
 
-import de.nschum.jbsandbox.SourceLocation;
+import de.nschum.jbsandbox.SourceRange;
 
 /**
  * An error about a reference to an unknown variable in the syntax tree
  */
 public class UnresolvedVariableError extends ASTError {
 
-    public UnresolvedVariableError(SourceLocation location) {
+    public UnresolvedVariableError(SourceRange location) {
         super(location);
     }
 }
