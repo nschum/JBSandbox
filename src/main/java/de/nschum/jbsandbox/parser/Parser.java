@@ -78,7 +78,7 @@ public class Parser {
         Optional<GrammarRule> optionalRule = parserTable.getRuleForTerminal(nextToken.getGrammarToken(), state);
         if (!optionalRule.isPresent()) {
             if (nextToken.getGrammarToken().equals(EOF)) {
-                throw new MissingTokenException(state);
+                throw new MissingTokenException(state, nextToken.getLocation());
             } else {
                 throw new UnexpectedTokenException(nextToken);
             }

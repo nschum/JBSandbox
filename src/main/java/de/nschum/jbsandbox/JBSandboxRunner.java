@@ -39,7 +39,7 @@ public class JBSandboxRunner {
         } catch (UnexpectedTokenException e) {
             System.err.println("Unexpected token: " + humanReadableLocation(path, e.getLocation()));
         } catch (MissingTokenException e) {
-            System.err.println("Unexpected end of input: " + e.getMessage());
+            System.err.println(e.getMessage() + humanReadableLocation(path, e.getLocation()));
         } catch (InterpreterRuntimeException e) {
             System.err.println("Runtime error: " + e.getMessage());
         }
