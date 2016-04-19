@@ -1,11 +1,13 @@
 package de.nschum.jbsandbox.ast;
 
+import de.nschum.jbsandbox.SourceRange;
+
 public class Reference extends Expression {
 
     private Variable variable;
 
-    public Reference(Variable variable) {
-        super(variable.getType());
+    public Reference(Variable variable, SourceRange location) {
+        super(variable.getType(), location);
         this.variable = variable;
     }
 

@@ -67,6 +67,15 @@ public class Parser {
             }
         }
 
+        if (stack.size() > 0) {
+            assert stack.peek().getToken().equals(EOF);
+            ParserTree output = stack.pop();
+            output.setContent(Optional.of(""));
+            // has empty length
+            SourceLocation location = nextToken.getLocation().getStart();
+            output.setLocation(new SourceRange(location, location));
+        }
+
         if (unreadTokens.hasNext()) {
             throw new UnexpectedTokenException(nextToken);
         }

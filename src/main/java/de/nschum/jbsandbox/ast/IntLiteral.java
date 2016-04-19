@@ -1,11 +1,13 @@
 package de.nschum.jbsandbox.ast;
 
+import de.nschum.jbsandbox.SourceRange;
+
 public class IntLiteral extends Expression {
 
     private int content;
 
-    public IntLiteral(int content) {
-        super(Type.INT);
+    public IntLiteral(int content, SourceRange location) {
+        super(Type.INT, location);
         this.content = content;
     }
 

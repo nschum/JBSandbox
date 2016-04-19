@@ -53,7 +53,7 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
 
         ParserTree expressionTree = parserTree.getChild(1);
 
-        return new ParenthesizedExpression(parseExpression(expressionTree, scope));
+        return new ParenthesizedExpression(parseExpression(expressionTree, scope), parserTree.getLocation());
     }
 
     private Expression parseRuleReference(ParserTree parserTree, Scope scope) {
@@ -67,7 +67,8 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
             reportError(new UnresolvedVariableError(parserTree.getLocation()));
         }
 
-        return new Reference(referencedVariable.orElse(new Variable(Type.UNDETERMINED, variableName)));
+        return new Reference(referencedVariable.orElse(new Variable(Type.UNDETERMINED, variableName)),
+                parserTree.getLocation());
     }
 
     private Expression parseRuleRange(ParserTree parserTree, Scope scope) {
@@ -83,7 +84,7 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
             reportError(new TypeError(parserTree.getLocation()));
         }
 
-        return new IntRangeExpression(lowerBound, upperBound);
+        return new IntRangeExpression(lowerBound, upperBound, parserTree.getLocation());
     }
 
     private Expression parseRuleNumber(ParserTree parserTree) {
@@ -111,7 +112,7 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
         Expression lambda = parseExpression(expressionTree, scope.addVariable(parameter));
 
         final Lambda function = new Lambda(Arrays.asList(parameter), lambda);
-        return new MapExpression(new SequenceType(lambda.getType()), input, function);
+        return new MapExpression(new SequenceType(lambda.getType()), input, function, parserTree.getLocation());
     }
 
     private Expression parseRuleReduce(ParserTree parserTree, Scope scope) {
@@ -138,7 +139,7 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
         }
 
         final Lambda function = new Lambda(Arrays.asList(parameter1, parameter2), lambda);
-        return new ReduceExpression(type, input, initialValue, function);
+        return new ReduceExpression(type, input, initialValue, function, parserTree.getLocation());
     }
 
     private Expression parseRuleNegate(ParserTree parserTree) {
@@ -229,9 +230,9 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
         Expression result;
         final String content = numberTree.getContent().get();
         if (content.contains(".")) {
-            result = new FloatLiteral(Double.parseDouble(content) * factor);
+            result = new FloatLiteral(Double.parseDouble(content) * factor, numberTree.getLocation());
         } else {
-            result = new IntLiteral(Integer.parseInt(content) * factor);
+            result = new IntLiteral(Integer.parseInt(content) * factor, numberTree.getLocation());
         }
         return result;
     }

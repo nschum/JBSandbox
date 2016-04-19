@@ -1,11 +1,14 @@
 package de.nschum.jbsandbox.ast;
 
+import de.nschum.jbsandbox.SourceRange;
+
 public class Declaration extends Statement {
 
     private Variable variable;
     private Expression expression;
 
-    public Declaration(Variable variable, Expression expression) {
+    public Declaration(Variable variable, Expression expression, SourceRange location) {
+        super(location);
         this.variable = variable;
         this.expression = expression;
     }

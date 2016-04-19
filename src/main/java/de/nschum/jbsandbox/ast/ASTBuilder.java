@@ -34,7 +34,7 @@ public class ASTBuilder extends ASTBaseBuilder {
 
         assert current.getRule() == grammar.ruleEof;
 
-        return new Program(statements);
+        return new Program(statements, parserTree.getLocation());
     }
 
     private Statement parseStatement(ParserTree parserTree, Stack<Scope> scopes) {
