@@ -41,7 +41,7 @@ public class JBSandboxRunner {
         } catch (MissingTokenException e) {
             System.err.println(e.getMessage() + humanReadableLocation(path, e.getLocation()));
         } catch (InterpreterRuntimeException e) {
-            System.err.println("Runtime error: " + e.getMessage());
+            System.err.println(e.getMessage() + ": " + humanReadableLocation(path, e.getLocation()));
         }
     }
 
