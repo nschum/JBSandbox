@@ -38,7 +38,12 @@ public class Parser {
         ScannerToken nextToken = unreadTokens.next();
 
         while (stack.size() > 0 && !stack.peek().getToken().equals(EOF)) {
-            if (nextToken.getGrammarToken().equals(stack.peek().getToken())) {
+            if (stack.peek().getToken().equals(EPSILON)) {
+                // skip epsilon
+                ParserTree output = stack.pop();
+                output.setContent(Optional.of(""));
+                output.setLocation(nextToken.getLocation());
+            } else if (stack.peek().getToken().equals(nextToken.getGrammarToken())) {
                 // process terminal and remove it from input
                 ParserTree output = stack.pop();
                 output.setContent(Optional.of(nextToken.getContent()));
@@ -52,11 +57,9 @@ public class Parser {
 
                 for (GrammarToken token : reverse(rule.getRightHandSide())) {
                     tree.setRule(rule);
-                    if (!token.equals(EPSILON)) {
-                        ParserTree newTree = new ParserTree(token);
-                        tree.addChild(newTree);
-                        stack.push(newTree);
-                    }
+                    ParserTree newTree = new ParserTree(token);
+                    tree.addChild(newTree);
+                    stack.push(newTree);
                 }
             }
         }

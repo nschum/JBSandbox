@@ -184,7 +184,7 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
 
     private Expression parseRuleNoOperator(ParserTree parserTree, Expression expression) {
         // No remainder, just return the original expression.
-        assertRule(parserTree);
+        assertRule(parserTree, EPSILON);
         return expression;
     }
 

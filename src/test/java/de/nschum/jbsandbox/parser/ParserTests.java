@@ -29,7 +29,7 @@ public class ParserTests {
     }
 
     private Matcher<ParserTree> parserTreeWithToken(GrammarToken token, int column) {
-        if (token.isTerminal()) {
+        if (token.isTerminal() && !token.equals(EPSILON)) {
             return allOf(
                     hasProperty("token", equalTo(token)),
                     hasProperty("location", equalTo(new SourceLocation(0, column))),
@@ -136,7 +136,7 @@ public class ParserTests {
                 allOf(
                         parserTreeWithToken(B, 1),
                         parserTreeWithRule(rule2),
-                        parserTreeWithChildren(empty())),
+                        parserTreeWithChildren(parserTreeWithToken(EPSILON, 1))),
                 parserTreeWithToken(c, 1)
         ));
     }
