@@ -7,7 +7,7 @@ import de.nschum.jbsandbox.source.SourceRange;
  */
 public class TypeError extends ASTError {
 
-    public TypeError(SourceRange location) {
-        super(location);
+    public TypeError(String message, SourceRange location) {
+        super(message, location);
     }
 }

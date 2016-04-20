@@ -41,7 +41,7 @@ public class JBSandboxRunner {
         ErrorPrinter errorPrinter = new ErrorPrinter();
         try {
             List<ASTError> errors = run(file);
-            errors.forEach(e -> errorPrinter.print("Parse error", file, e.getLocation()));
+            errors.forEach(e -> errorPrinter.print(e.getMessage(), file, e.getLocation()));
         } catch (IOException e) {
             System.err.println("Could not read: " + e.getMessage());
         } catch (IllegalTokenException e) {

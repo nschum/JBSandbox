@@ -7,7 +7,7 @@ import de.nschum.jbsandbox.source.SourceRange;
  */
 public class UnresolvedVariableError extends ASTError {
 
-    public UnresolvedVariableError(SourceRange location) {
-        super(location);
+    public UnresolvedVariableError(String message, SourceRange location) {
+        super(message, location);
     }
 }

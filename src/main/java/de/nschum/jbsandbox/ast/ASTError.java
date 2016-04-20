@@ -7,11 +7,18 @@ import de.nschum.jbsandbox.source.SourceRange;
  */
 public abstract class ASTError {
 
+    private String message;
     private SourceRange location;
 
-    public ASTError(SourceRange location) {
+    public ASTError(String message, SourceRange location) {
+        assert message != null;
         assert location != null;
+        this.message = message;
         this.location = location;
+    }
+
+    public String getMessage() {
+        return message;
     }
 
     public SourceRange getLocation() {

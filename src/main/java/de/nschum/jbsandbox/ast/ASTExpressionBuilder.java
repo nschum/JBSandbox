@@ -1,9 +1,9 @@
 package de.nschum.jbsandbox.ast;
 
-import de.nschum.jbsandbox.source.SourceRange;
 import de.nschum.jbsandbox.grammar.GrammarRule;
 import de.nschum.jbsandbox.grammar.JBGrammar;
 import de.nschum.jbsandbox.parser.ParserTree;
+import de.nschum.jbsandbox.source.SourceRange;
 
 import java.util.Arrays;
 import java.util.List;
@@ -64,7 +64,7 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
         final String variableName = identifierTree.getContent().get();
         Optional<Variable> referencedVariable = scope.lookUp(variableName);
         if (!referencedVariable.isPresent()) {
-            reportError(new UnresolvedVariableError(parserTree.getLocation()));
+            reportError(new UnresolvedVariableError("Unknown variable " + variableName, parserTree.getLocation()));
         }
 
         return new Reference(referencedVariable.orElse(new Variable(Type.UNDETERMINED, variableName)),
@@ -81,7 +81,9 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
         Expression upperBound = parseExpression(upperBoundTree, scope);
 
         if (!lowerBound.getType().equals(Type.INT) || !upperBound.getType().equals(Type.INT)) {
-            reportError(new TypeError(parserTree.getLocation()));
+            reportError(new TypeError("Range bounds must be integers (was {"
+                    + lowerBound.getType() + "," + upperBound.getType() + "})",
+                    parserTree.getLocation()));
         }
 
         return new IntRangeExpression(lowerBound, upperBound, parserTree.getLocation());
@@ -104,7 +106,8 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
 
         Expression input = parseExpression(inputTree, scope);
         if (!input.getType().isSequence()) {
-            reportError(new TypeError(parserTree.getLocation()));
+            reportError(new TypeError("Map input must be a sequence (was " + input.getType() + ")",
+                    parserTree.getLocation()));
         }
         Type innerType = input.getType().getInnerType();
         Variable parameter = new Variable(innerType, parameterTree.getContent().get());
@@ -128,14 +131,17 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
         Expression initialValue = parseExpression(initialValueTree, scope);
         Type type = promoteTypes(initialValue.getType(), input.getType().getInnerType(), parserTree.getLocation());
         if (!input.getType().isSequence()) {
-            reportError(new TypeError(parserTree.getLocation()));
+            reportError(new TypeError("Reduce input must be a sequence (was " + input.getType() + ")",
+                    parserTree.getLocation()));
         }
         Variable parameter1 = new Variable(type, parameterTree1.getContent().get());
         Variable parameter2 = new Variable(type, parameterTree2.getContent().get());
 
         Expression lambda = parseExpression(expressionTree, scope.addVariable(parameter1).addVariable(parameter2));
         if (!type.canBeAssignedFrom(lambda.getType())) {
-            reportError(new TypeError(parserTree.getLocation()));
+            reportError(new TypeError("Lambda return type does not match sequence and initial value (was "
+                    + lambda.getType() + ")",
+                    parserTree.getLocation()));
         }
 
         final Lambda function = new Lambda(Arrays.asList(parameter1, parameter2), lambda);
@@ -173,10 +179,13 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
         Operation operation = parseOperation(operationTree);
         Expression rightHandExpression = parseExpression(rightHandExpressionTree, scope);
 
-        Type type =
-                promoteTypes(leftHandExpression.getType(), rightHandExpression.getType(), operationTree.getLocation());
+        Type leftHandType = leftHandExpression.getType();
+        Type rightHandType = rightHandExpression.getType();
+        Type type = promoteTypes(leftHandType, rightHandType, operationTree.getLocation());
         if (!type.canPerformArithmetic()) {
-            reportError(new TypeError(parserTree.getLocation()));
+            reportError(new TypeError("Operation arguments must be integers (was "
+                    + leftHandType + " and " + rightHandType + ")",
+                    parserTree.getLocation()));
         }
 
         OperationExpression result = new OperationExpression(type, leftHandExpression, rightHandExpression, operation);
@@ -197,7 +206,7 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
         } else if (type2.canBeAssignedFrom(type1)) {
             return type2;
         } else {
-            reportError(new TypeError(location));
+            reportError(new TypeError("Incompatible types " + type1 + " and " + type2, location));
             return Type.UNDETERMINED;
         }
     }
