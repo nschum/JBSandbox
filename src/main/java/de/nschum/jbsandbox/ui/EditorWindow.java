@@ -1,6 +1,7 @@
 package de.nschum.jbsandbox.ui;
 
 import javax.swing.*;
+import javax.swing.undo.UndoManager;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
@@ -12,6 +13,8 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
 
     private JTextPane textPane;
     private Optional<File> file = Optional.empty();
+    private EditorWindowMenuBar menu;
+    private UndoManager undoManager = new UndoManager();
 
     public static EditorWindow showNewEditorWindow(Optional<File> file) {
         EditorWindow editor = new EditorWindow(file);
@@ -23,14 +26,19 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
     private EditorWindow(Optional<File> file) {
         setTitle("Untitled");
 
-        EditorWindowMenuBar menu = new EditorWindowMenuBar(this);
+        menu = new EditorWindowMenuBar(this);
         setJMenuBar(menu);
 
         textPane = new JTextPane();
         textPane.setCaretPosition(0);
         textPane.setMargin(new Insets(5, 5, 5, 5));
         textPane.addCaretListener(e -> menu.setCopyCutEnabled(textPane.getSelectedText() != null));
+
         file.ifPresent(this::readFile);
+        textPane.getDocument().addUndoableEditListener(e -> {
+            undoManager.addEdit(e.getEdit());
+            updateUndo();
+        });
 
         JScrollPane scrollPane = new JScrollPane(textPane);
         add(scrollPane);
@@ -38,6 +46,11 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
         if (!"true".equals(System.getProperty("apple.laf.useScreenMenuBar"))) {
             setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         }
+    }
+
+    private void updateUndo() {
+        menu.setUndoTitle(undoManager.canUndo() ? Optional.of(undoManager.getUndoPresentationName()) : Optional.empty());
+        menu.setRedoTitle(undoManager.canRedo() ? Optional.of(undoManager.getRedoPresentationName()) : Optional.empty());
     }
 
     private void readFile(File file) {
@@ -95,6 +108,18 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
     @Override
     public void menuItemSaveSelected(ActionEvent e) {
         save();
+    }
+
+    @Override
+    public void menuItemUndoSelected(ActionEvent e) {
+        undoManager.undo();
+        updateUndo();
+    }
+
+    @Override
+    public void menuItemRedoSelected(ActionEvent e) {
+        undoManager.redo();
+        updateUndo();
     }
 
     @Override
