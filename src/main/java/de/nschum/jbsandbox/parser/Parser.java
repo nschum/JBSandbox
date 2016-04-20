@@ -1,11 +1,11 @@
 package de.nschum.jbsandbox.parser;
 
-import de.nschum.jbsandbox.source.SourceLocation;
-import de.nschum.jbsandbox.source.SourceRange;
 import de.nschum.jbsandbox.grammar.Grammar;
 import de.nschum.jbsandbox.grammar.GrammarRule;
 import de.nschum.jbsandbox.grammar.GrammarToken;
 import de.nschum.jbsandbox.scanner.ScannerToken;
+import de.nschum.jbsandbox.source.SourceLocation;
+import de.nschum.jbsandbox.source.SourceRange;
 
 import java.util.*;
 
@@ -100,7 +100,8 @@ public class Parser {
      */
     private Iterator<ScannerToken> iterateWithEOF(List<ScannerToken> tokens) {
         List<ScannerToken> tokensWithEOF = new ArrayList<>(tokens);
-        SourceLocation eofLocation = tokens.get(tokens.size() - 1).getLocation().getEnd();
+        SourceLocation eofLocation =
+                tokens.size() > 0 ? tokens.get(tokens.size() - 1).getLocation().getEnd() : new SourceLocation(0, 0);
         tokensWithEOF.add(new ScannerToken(EOF, "", new SourceRange(eofLocation, eofLocation)));
         return tokensWithEOF.iterator();
     }
