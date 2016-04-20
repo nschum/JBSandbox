@@ -14,8 +14,6 @@ import de.nschum.jbsandbox.scanner.IllegalTokenException;
 import de.nschum.jbsandbox.scanner.JBScanner;
 import de.nschum.jbsandbox.scanner.ScannerToken;
 import de.nschum.jbsandbox.source.SourceFile;
-import de.nschum.jbsandbox.source.SourceLocation;
-import de.nschum.jbsandbox.source.SourceRange;
 
 import java.io.*;
 import java.util.List;
@@ -30,22 +28,38 @@ public class JBSandboxRunner {
             printUsage();
             System.exit(1);
         }
-        String path = args[0];
 
+        SourceFile file;
         try {
-            SourceFile file = new SourceFile(path, createReader(path));
+            file = createFile(args[0]);
+        } catch (FileNotFoundException e) {
+            System.err.println("Could not read: " + e.getMessage());
+            System.exit(1);
+            return;
+        }
+
+        ErrorPrinter errorPrinter = new ErrorPrinter();
+        try {
             List<ASTError> errors = run(file);
-            printErrors(errors, path);
+            errors.forEach(e -> errorPrinter.print("Parse error", file, e.getLocation()));
         } catch (IOException e) {
             System.err.println("Could not read: " + e.getMessage());
         } catch (IllegalTokenException e) {
-            System.err.println("Illegal token: " + humanReadableLocation(path, e.getLocation()));
+            errorPrinter.print("Illegal token", file, e.getLocation());
         } catch (UnexpectedTokenException e) {
-            System.err.println("Unexpected token: " + humanReadableLocation(path, e.getLocation()));
+            errorPrinter.print("Unexpected token", file, e.getLocation());
         } catch (MissingTokenException e) {
-            System.err.println(e.getMessage() + humanReadableLocation(path, e.getLocation()));
+            errorPrinter.print(e.getMessage(), file, e.getLocation());
         } catch (InterpreterRuntimeException e) {
-            System.err.println(e.getMessage() + ": " + humanReadableLocation(path, e.getLocation()));
+            errorPrinter.print(e.getMessage(), file, e.getLocation());
+        }
+    }
+
+    private static SourceFile createFile(String path) throws FileNotFoundException {
+        if (path.equals("-")) {
+            return new SourceFile("-", new InputStreamReader(System.in));
+        } else {
+            return new SourceFile(new File(path).getName(), new FileReader(path));
         }
     }
 
@@ -62,26 +76,6 @@ public class JBSandboxRunner {
         System.err.println("java -cp JBSandbox.jar " + JBSandboxRunner.class.getName() + " [FILE]");
         System.err.println();
         System.err.println("  FILE:\tThe file to parse or \"-\" for reading a program from stdin");
-    }
-
-    private static void printErrors(List<ASTError> errors, String path) {
-        for (ASTError error : errors) {
-            System.err.println("Parse error: " + humanReadableLocation(path, error.getLocation()));
-        }
-    }
-
-    private static String humanReadableLocation(SourceLocation location) {
-        return (location.getLine() + 1) + ":" + (location.getColumn() + 1);
-    }
-
-    private static String humanReadableLocation(String path, SourceLocation location) {
-        return new File(path).getName() + ":" + humanReadableLocation(location);
-    }
-
-    private static String humanReadableLocation(String path, SourceRange location) {
-        return new File(path).getName() + ":"
-                + humanReadableLocation(location.getStart()) + "-"
-                + humanReadableLocation(location.getEnd());
     }
 
     private static List<ASTError> run(SourceFile file)

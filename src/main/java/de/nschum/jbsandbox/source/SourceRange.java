@@ -24,6 +24,14 @@ public class SourceRange {
         return end;
     }
 
+    public boolean isSingleLine() {
+        return start.getLine() == end.getLine();
+    }
+
+    public boolean isSinglePoint() {
+        return start.equals(end);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

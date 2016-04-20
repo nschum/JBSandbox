@@ -35,4 +35,8 @@ public class SourceFile {
     public List<String> getLines() {
         return lines;
     }
+
+    public String getLineForLocation(SourceLocation location) {
+        return lines.get(location.getLine());
+    }
 }
