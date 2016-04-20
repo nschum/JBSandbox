@@ -1,6 +1,6 @@
 package de.nschum.jbsandbox.scanner;
 
-import de.nschum.jbsandbox.SourceRange;
+import de.nschum.jbsandbox.source.SourceRange;
 import de.nschum.jbsandbox.grammar.GrammarToken;
 
 /**

@@ -13,6 +13,9 @@ import de.nschum.jbsandbox.parser.UnexpectedTokenException;
 import de.nschum.jbsandbox.scanner.IllegalTokenException;
 import de.nschum.jbsandbox.scanner.JBScanner;
 import de.nschum.jbsandbox.scanner.ScannerToken;
+import de.nschum.jbsandbox.source.SourceFile;
+import de.nschum.jbsandbox.source.SourceLocation;
+import de.nschum.jbsandbox.source.SourceRange;
 
 import java.io.*;
 import java.util.List;
@@ -30,7 +33,8 @@ public class JBSandboxRunner {
         String path = args[0];
 
         try {
-            List<ASTError> errors = run(createReader(path));
+            SourceFile file = new SourceFile(path, createReader(path));
+            List<ASTError> errors = run(file);
             printErrors(errors, path);
         } catch (IOException e) {
             System.err.println("Could not read: " + e.getMessage());
@@ -80,14 +84,14 @@ public class JBSandboxRunner {
                 + humanReadableLocation(location.getEnd());
     }
 
-    private static List<ASTError> run(Reader input)
+    private static List<ASTError> run(SourceFile file)
             throws IllegalTokenException, UnexpectedTokenException, MissingTokenException, IOException,
             InterpreterRuntimeException {
 
         JBGrammar grammar = new JBGrammar();
         Parser parser = new Parser(grammar);
 
-        List<ScannerToken> tokens = new JBScanner().scan(input);
+        List<ScannerToken> tokens = new JBScanner().scan(file);
         ParserTree parserTree = parser.parse(tokens);
         ASTBuilder astBuilder = new ASTBuilder(grammar);
         Program syntaxTree = astBuilder.createSyntaxTree(parserTree);

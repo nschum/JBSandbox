@@ -1,7 +1,9 @@
 package de.nschum.jbsandbox.scanner;
 
+import de.nschum.jbsandbox.source.SourceFile;
 import org.junit.Test;
 
+import java.io.StringReader;
 import java.util.List;
 
 import static de.nschum.jbsandbox.Matchers.contains;
@@ -13,10 +15,15 @@ public class ScannerIdentifierTests {
 
     Scanner scanner = new JBScanner();
 
+    private List<ScannerToken> scan(String input) throws IllegalTokenException {
+        SourceFile file = new SourceFile("-", new StringReader(input));
+        return scanner.scan(file);
+    }
+
     @Test
     public void shouldRecognizeAlphabeticString() throws Exception {
         // when
-        final List<ScannerToken> tokens = scanner.scan("a");
+        final List<ScannerToken> tokens = scan("a");
 
         // then
         assertThat(tokens, contains(token(IDENTIFIER)));
@@ -25,7 +32,7 @@ public class ScannerIdentifierTests {
     @Test
     public void shouldRecognizeAlphanumericString() throws Exception {
         // when
-        final List<ScannerToken> tokens = scanner.scan("a1b2");
+        final List<ScannerToken> tokens = scan("a1b2");
 
         // then
         assertThat(tokens, contains(token(IDENTIFIER)));

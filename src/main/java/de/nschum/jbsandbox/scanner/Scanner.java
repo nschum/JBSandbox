@@ -1,11 +1,10 @@
 package de.nschum.jbsandbox.scanner;
 
-import de.nschum.jbsandbox.SourceLocation;
-import de.nschum.jbsandbox.SourceRange;
 import de.nschum.jbsandbox.grammar.GrammarToken;
+import de.nschum.jbsandbox.source.SourceFile;
+import de.nschum.jbsandbox.source.SourceLocation;
+import de.nschum.jbsandbox.source.SourceRange;
 
-import java.io.Reader;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -51,27 +50,18 @@ public class Scanner {
 
     // scanning
 
-    public List<ScannerToken> scan(String input) throws IllegalTokenException {
-        return scan(new StringReader(input));
-    }
-
-    public List<ScannerToken> scan(Reader reader) throws IllegalTokenException {
+    public List<ScannerToken> scan(SourceFile file) throws IllegalTokenException {
         if (combinedPattern == null) {
             throw new IllegalStateException("Regular expressions were not compiled");
         }
 
-        java.util.Scanner scanner = new java.util.Scanner(reader);
-        try {
-            List<ScannerToken> tokens = new ArrayList<>();
-            int lineNumber = 0;
-            while (scanner.hasNextLine()) {
-                scanLine(scanner.nextLine(), lineNumber, tokens);
-                lineNumber++;
-            }
-            return tokens;
-        } finally {
-            scanner.close();
+        List<ScannerToken> tokens = new ArrayList<>();
+        int lineNumber = 0;
+        for (String line : file.getLines()) {
+            scanLine(line, lineNumber, tokens);
+            lineNumber++;
         }
+        return tokens;
     }
 
     private void scanLine(String line, int lineNumber, List<ScannerToken> output) throws IllegalTokenException {

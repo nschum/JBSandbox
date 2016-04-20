@@ -1,6 +1,6 @@
 package de.nschum.jbsandbox.ast;
 
-import de.nschum.jbsandbox.SourceRange;
+import de.nschum.jbsandbox.source.SourceRange;
 
 /**
  * An error about a reference to an unknown variable in the syntax tree

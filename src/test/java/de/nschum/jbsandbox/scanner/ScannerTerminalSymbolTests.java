@@ -1,7 +1,9 @@
 package de.nschum.jbsandbox.scanner;
 
+import de.nschum.jbsandbox.source.SourceFile;
 import org.junit.Test;
 
+import java.io.StringReader;
 import java.util.List;
 
 import static de.nschum.jbsandbox.Matchers.contains;
@@ -13,10 +15,15 @@ public class ScannerTerminalSymbolTests {
 
     Scanner scanner = new JBScanner();
 
+    private List<ScannerToken> scan(String input) throws IllegalTokenException {
+        SourceFile file = new SourceFile("-", new StringReader(input));
+        return scanner.scan(file);
+    }
+
     @Test
     public void shouldRecognizeParenOpen() throws Exception {
         // when
-        final List<ScannerToken> tokens = scanner.scan("(");
+        final List<ScannerToken> tokens = scan("(");
 
         // then
         assertThat(tokens, contains(token(PAREN_OPEN)));
@@ -25,7 +32,7 @@ public class ScannerTerminalSymbolTests {
     @Test
     public void shouldRecognizeParenClose() throws Exception {
         // when
-        final List<ScannerToken> tokens = scanner.scan(")");
+        final List<ScannerToken> tokens = scan(")");
 
         // then
         assertThat(tokens, contains(token(PAREN_CLOSE)));
@@ -34,7 +41,7 @@ public class ScannerTerminalSymbolTests {
     @Test
     public void shouldRecognizeBraceOpen() throws Exception {
         // when
-        final List<ScannerToken> tokens = scanner.scan("{");
+        final List<ScannerToken> tokens = scan("{");
 
         // then
         assertThat(tokens, contains(token(BRACE_OPEN)));
@@ -43,7 +50,7 @@ public class ScannerTerminalSymbolTests {
     @Test
     public void shouldRecognizeBraceClose() throws Exception {
         // when
-        final List<ScannerToken> tokens = scanner.scan("}");
+        final List<ScannerToken> tokens = scan("}");
 
         // then
         assertThat(tokens, contains(token(BRACE_CLOSE)));
@@ -52,7 +59,7 @@ public class ScannerTerminalSymbolTests {
     @Test
     public void shouldRecognizeComma() throws Exception {
         // when
-        final List<ScannerToken> tokens = scanner.scan(",");
+        final List<ScannerToken> tokens = scan(",");
 
         // then
         assertThat(tokens, contains(token(COMMA)));
@@ -61,7 +68,7 @@ public class ScannerTerminalSymbolTests {
     @Test
     public void shouldRecognizeArrow() throws Exception {
         // when
-        final List<ScannerToken> tokens = scanner.scan("->");
+        final List<ScannerToken> tokens = scan("->");
 
         // then
         assertThat(tokens, contains(token(ARROW)));
@@ -70,7 +77,7 @@ public class ScannerTerminalSymbolTests {
     @Test
     public void shouldRecognizePlus() throws Exception {
         // when
-        final List<ScannerToken> tokens = scanner.scan("+");
+        final List<ScannerToken> tokens = scan("+");
 
         // then
         assertThat(tokens, contains(token(PLUS)));
@@ -79,7 +86,7 @@ public class ScannerTerminalSymbolTests {
     @Test
     public void shouldRecognizeMinus() throws Exception {
         // when
-        final List<ScannerToken> tokens = scanner.scan("-");
+        final List<ScannerToken> tokens = scan("-");
 
         // then
         assertThat(tokens, contains(token(MINUS)));
@@ -88,7 +95,7 @@ public class ScannerTerminalSymbolTests {
     @Test
     public void shouldRecognizeStar() throws Exception {
         // when
-        final List<ScannerToken> tokens = scanner.scan("*");
+        final List<ScannerToken> tokens = scan("*");
 
         // then
         assertThat(tokens, contains(token(STAR)));
@@ -97,7 +104,7 @@ public class ScannerTerminalSymbolTests {
     @Test
     public void shouldRecognizeSlash() throws Exception {
         // when
-        final List<ScannerToken> tokens = scanner.scan("/");
+        final List<ScannerToken> tokens = scan("/");
 
         // then
         assertThat(tokens, contains(token(SLASH)));
@@ -106,7 +113,7 @@ public class ScannerTerminalSymbolTests {
     @Test
     public void shouldRecognizeHat() throws Exception {
         // when
-        final List<ScannerToken> tokens = scanner.scan("^");
+        final List<ScannerToken> tokens = scan("^");
 
         // then
         assertThat(tokens, contains(token(HAT)));
@@ -115,7 +122,7 @@ public class ScannerTerminalSymbolTests {
     @Test
     public void shouldRecognizeEquals() throws Exception {
         // when
-        final List<ScannerToken> tokens = scanner.scan("=");
+        final List<ScannerToken> tokens = scan("=");
 
         // then
         assertThat(tokens, contains(token(EQUALS)));
@@ -124,7 +131,7 @@ public class ScannerTerminalSymbolTests {
     @Test
     public void shouldRecognizeVar() throws Exception {
         // when
-        final List<ScannerToken> tokens = scanner.scan("var");
+        final List<ScannerToken> tokens = scan("var");
 
         // then
         assertThat(tokens, contains(token(KEYWORD_VAR)));
@@ -133,7 +140,7 @@ public class ScannerTerminalSymbolTests {
     @Test
     public void shouldRecognizeMap() throws Exception {
         // when
-        final List<ScannerToken> tokens = scanner.scan("map");
+        final List<ScannerToken> tokens = scan("map");
 
         // then
         assertThat(tokens, contains(token(KEYWORD_MAP)));
@@ -142,7 +149,7 @@ public class ScannerTerminalSymbolTests {
     @Test
     public void shouldRecognizeReduce() throws Exception {
         // when
-        final List<ScannerToken> tokens = scanner.scan("reduce");
+        final List<ScannerToken> tokens = scan("reduce");
 
         // then
         assertThat(tokens, contains(token(KEYWORD_REDUCE)));
@@ -151,7 +158,7 @@ public class ScannerTerminalSymbolTests {
     @Test
     public void shouldRecognizeOut() throws Exception {
         // when
-        final List<ScannerToken> tokens = scanner.scan("out");
+        final List<ScannerToken> tokens = scan("out");
 
         // then
         assertThat(tokens, contains(token(KEYWORD_OUT)));
@@ -160,7 +167,7 @@ public class ScannerTerminalSymbolTests {
     @Test
     public void shouldRecognizePrint() throws Exception {
         // when
-        final List<ScannerToken> tokens = scanner.scan("print");
+        final List<ScannerToken> tokens = scan("print");
 
         // then
         assertThat(tokens, contains(token(KEYWORD_PRINT)));

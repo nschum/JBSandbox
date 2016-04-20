@@ -1,7 +1,9 @@
 package de.nschum.jbsandbox.scanner;
 
+import de.nschum.jbsandbox.source.SourceFile;
 import org.junit.Test;
 
+import java.io.StringReader;
 import java.util.List;
 
 import static de.nschum.jbsandbox.Matchers.contains;
@@ -14,10 +16,15 @@ public class ScannerSequenceTests {
 
     Scanner scanner = new JBScanner();
 
+    private List<ScannerToken> scan(String input) throws IllegalTokenException {
+        SourceFile file = new SourceFile("-", new StringReader(input));
+        return scanner.scan(file);
+    }
+
     @Test
     public void shouldRecognizeMultipleTokens() throws Exception {
         // when
-        final List<ScannerToken> tokens = scanner.scan("( ) { } , -> + - * / ^ = var map reduce out print foo 123");
+        final List<ScannerToken> tokens = scan("( ) { } , -> + - * / ^ = var map reduce out print foo 123");
 
         // then
         assertThat(tokens, contains(
@@ -31,7 +38,7 @@ public class ScannerSequenceTests {
     @Test
     public void shouldRecognizeTokensSeparatedByOperators() throws Exception {
         // when
-        final List<ScannerToken> tokens = scanner.scan("map(\"reduce\"}123");
+        final List<ScannerToken> tokens = scan("map(\"reduce\"}123");
 
         // then
         assertThat(tokens, contains(
@@ -42,7 +49,7 @@ public class ScannerSequenceTests {
     @Test
     public void shouldRecognizeTokensSeparatedByLineBreaks() throws Exception {
         // when
-        final List<ScannerToken> tokens = scanner.scan("(\nfoo\n123");
+        final List<ScannerToken> tokens = scan("(\nfoo\n123");
 
         // then
         assertThat(tokens, contains(token(PAREN_OPEN), token(IDENTIFIER), token(NUMBER)));
@@ -51,7 +58,7 @@ public class ScannerSequenceTests {
     @Test
     public void shouldNotRecognizeJoinedKeywords() throws Exception {
         // when
-        final List<ScannerToken> tokens = scanner.scan("printout");
+        final List<ScannerToken> tokens = scan("printout");
 
         // then
         assertThat(tokens, contains(token(IDENTIFIER)));
@@ -60,7 +67,7 @@ public class ScannerSequenceTests {
     @Test
     public void shouldIncludeSourceRanges() throws Exception {
         // when
-        final List<ScannerToken> tokens = scanner.scan("( )\nvar map\nfoo 123");
+        final List<ScannerToken> tokens = scan("( )\nvar map\nfoo 123");
 
         // then
         assertThat(tokens, contains(

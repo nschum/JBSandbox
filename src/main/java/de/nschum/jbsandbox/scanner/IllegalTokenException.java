@@ -1,6 +1,6 @@
 package de.nschum.jbsandbox.scanner;
 
-import de.nschum.jbsandbox.SourceLocation;
+import de.nschum.jbsandbox.source.SourceLocation;
 
 public class IllegalTokenException extends Exception {
 

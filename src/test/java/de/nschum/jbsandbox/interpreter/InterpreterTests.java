@@ -10,10 +10,12 @@ import de.nschum.jbsandbox.parser.UnexpectedTokenException;
 import de.nschum.jbsandbox.scanner.IllegalTokenException;
 import de.nschum.jbsandbox.scanner.JBScanner;
 import de.nschum.jbsandbox.scanner.ScannerToken;
+import de.nschum.jbsandbox.source.SourceFile;
 import org.junit.Test;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.List;
 
@@ -29,7 +31,8 @@ public class InterpreterTests {
         JBGrammar grammar = new JBGrammar();
         Parser parser = new Parser(grammar);
 
-        List<ScannerToken> tokens = new JBScanner().scan(input);
+        SourceFile file = new SourceFile("-", new StringReader(input));
+        List<ScannerToken> tokens = new JBScanner().scan(file);
         ParserTree parserTree = parser.parse(tokens);
         ASTBuilder astBuilder = new ASTBuilder(grammar);
         Program syntaxTree = astBuilder.createSyntaxTree(parserTree);

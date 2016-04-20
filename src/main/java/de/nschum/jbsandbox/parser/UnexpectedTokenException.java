@@ -1,6 +1,6 @@
 package de.nschum.jbsandbox.parser;
 
-import de.nschum.jbsandbox.SourceRange;
+import de.nschum.jbsandbox.source.SourceRange;
 import de.nschum.jbsandbox.scanner.ScannerToken;
 
 /**

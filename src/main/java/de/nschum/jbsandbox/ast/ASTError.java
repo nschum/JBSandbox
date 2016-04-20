@@ -1,6 +1,6 @@
 package de.nschum.jbsandbox.ast;
 
-import de.nschum.jbsandbox.SourceRange;
+import de.nschum.jbsandbox.source.SourceRange;
 
 /**
  * An error created during semantic analysis when creating the AST from the ParserTree

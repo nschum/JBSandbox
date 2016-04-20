@@ -1,6 +1,6 @@
 package de.nschum.jbsandbox.ast;
 
-import de.nschum.jbsandbox.SourceRange;
+import de.nschum.jbsandbox.source.SourceRange;
 import de.nschum.jbsandbox.grammar.GrammarRule;
 import de.nschum.jbsandbox.grammar.JBGrammar;
 import de.nschum.jbsandbox.parser.ParserTree;

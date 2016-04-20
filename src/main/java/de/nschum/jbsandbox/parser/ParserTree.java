@@ -1,7 +1,7 @@
 package de.nschum.jbsandbox.parser;
 
-import de.nschum.jbsandbox.SourceLocation;
-import de.nschum.jbsandbox.SourceRange;
+import de.nschum.jbsandbox.source.SourceLocation;
+import de.nschum.jbsandbox.source.SourceRange;
 import de.nschum.jbsandbox.grammar.GrammarRule;
 import de.nschum.jbsandbox.grammar.GrammarToken;
 

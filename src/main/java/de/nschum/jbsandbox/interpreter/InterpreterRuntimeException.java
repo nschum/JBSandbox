@@ -1,6 +1,6 @@
 package de.nschum.jbsandbox.interpreter;
 
-import de.nschum.jbsandbox.SourceRange;
+import de.nschum.jbsandbox.source.SourceRange;
 
 /**
  * An exception that occurs during program execution by the interpreter
