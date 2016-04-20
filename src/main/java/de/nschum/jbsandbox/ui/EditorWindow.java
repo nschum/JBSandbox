@@ -24,7 +24,7 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
     }
 
     private EditorWindow(Optional<File> file) {
-        setTitle("Untitled");
+        setModified(false);
 
         menu = new EditorWindowMenuBar(this);
         setJMenuBar(menu);
@@ -38,6 +38,7 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
         textPane.getDocument().addUndoableEditListener(e -> {
             undoManager.addEdit(e.getEdit());
             updateUndo();
+            setModified(true);
         });
 
         JScrollPane scrollPane = new JScrollPane(textPane);
@@ -58,6 +59,7 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
             textPane.setPage(file.toURI().toURL());
             this.file = Optional.of(file);
             setTitle(file.getName());
+            getRootPane().putClientProperty("Window.documentFile", file);
         } catch (IOException e) {
             JOptionPane.showMessageDialog(this, "Could not read file");
         }
@@ -80,9 +82,15 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
     private void writeToFile(File file) {
         try (FileWriter writer = new FileWriter(file)) {
             writer.write(textPane.getText());
+            setModified(false);
         } catch (IOException e) {
             JOptionPane.showMessageDialog(this, "Could not save file");
         }
+    }
+
+    private void setModified(boolean modified) {
+        setTitle(file.map(File::getName).orElse("Untitled") + (modified ? " (modified)" : ""));
+        getRootPane().putClientProperty("Window.documentModifieduu", modified);
     }
 
     // MenuHandler
