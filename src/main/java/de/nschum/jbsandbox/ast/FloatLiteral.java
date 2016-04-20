@@ -1,11 +1,13 @@
 package de.nschum.jbsandbox.ast;
 
+import de.nschum.jbsandbox.source.SourceRange;
+
 public class FloatLiteral extends Expression {
 
     private double content;
 
-    public FloatLiteral(double content) {
-        super(Type.FLOAT);
+    public FloatLiteral(double content, SourceRange location) {
+        super(Type.FLOAT, location);
         this.content = content;
     }
 

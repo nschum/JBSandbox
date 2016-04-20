@@ -1,5 +1,7 @@
 package de.nschum.jbsandbox.ast;
 
+import de.nschum.jbsandbox.source.SourceRange;
+
 /**
  * Single expression node
  * <p>
@@ -9,8 +11,8 @@ public class ParenthesizedExpression extends Expression {
 
     private Expression expression;
 
-    public ParenthesizedExpression(Expression expression) {
-        super(expression.getType());
+    public ParenthesizedExpression(Expression expression, SourceRange location) {
+        super(expression.getType(), location);
         this.expression = expression;
     }
 

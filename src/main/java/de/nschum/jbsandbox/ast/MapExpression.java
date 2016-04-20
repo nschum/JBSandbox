@@ -1,12 +1,14 @@
 package de.nschum.jbsandbox.ast;
 
+import de.nschum.jbsandbox.source.SourceRange;
+
 public class MapExpression extends Expression {
 
     private Expression input;
     private Lambda function;
 
-    public MapExpression(Type type, Expression input, Lambda function) {
-        super(type);
+    public MapExpression(Type type, Expression input, Lambda function, SourceRange location) {
+        super(type, location);
         this.input = input;
         this.function = function;
     }

@@ -3,6 +3,7 @@ package de.nschum.jbsandbox.ast;
 import de.nschum.jbsandbox.grammar.GrammarRule;
 import de.nschum.jbsandbox.grammar.JBGrammar;
 import de.nschum.jbsandbox.parser.ParserTree;
+import de.nschum.jbsandbox.source.SourceRange;
 
 import java.util.Arrays;
 import java.util.List;
@@ -52,7 +53,7 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
 
         ParserTree expressionTree = parserTree.getChild(1);
 
-        return new ParenthesizedExpression(parseExpression(expressionTree, scope));
+        return new ParenthesizedExpression(parseExpression(expressionTree, scope), parserTree.getLocation());
     }
 
     private Expression parseRuleReference(ParserTree parserTree, Scope scope) {
@@ -63,10 +64,11 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
         final String variableName = identifierTree.getContent().get();
         Optional<Variable> referencedVariable = scope.lookUp(variableName);
         if (!referencedVariable.isPresent()) {
-            reportError(new UnresolvedVariableError());
+            reportError(new UnresolvedVariableError("Unknown variable " + variableName, parserTree.getLocation()));
         }
 
-        return new Reference(referencedVariable.orElse(new Variable(Type.UNDETERMINED, variableName)));
+        return new Reference(referencedVariable.orElse(new Variable(Type.UNDETERMINED, variableName)),
+                parserTree.getLocation());
     }
 
     private Expression parseRuleRange(ParserTree parserTree, Scope scope) {
@@ -79,10 +81,12 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
         Expression upperBound = parseExpression(upperBoundTree, scope);
 
         if (!lowerBound.getType().equals(Type.INT) || !upperBound.getType().equals(Type.INT)) {
-            reportError(new TypeError());
+            reportError(new TypeError("Range bounds must be integers (was {"
+                    + lowerBound.getType() + "," + upperBound.getType() + "})",
+                    parserTree.getLocation()));
         }
 
-        return new IntRangeExpression(lowerBound, upperBound);
+        return new IntRangeExpression(lowerBound, upperBound, parserTree.getLocation());
     }
 
     private Expression parseRuleNumber(ParserTree parserTree) {
@@ -102,7 +106,8 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
 
         Expression input = parseExpression(inputTree, scope);
         if (!input.getType().isSequence()) {
-            reportError(new TypeError());
+            reportError(new TypeError("Map input must be a sequence (was " + input.getType() + ")",
+                    parserTree.getLocation()));
         }
         Type innerType = input.getType().getInnerType();
         Variable parameter = new Variable(innerType, parameterTree.getContent().get());
@@ -110,7 +115,7 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
         Expression lambda = parseExpression(expressionTree, scope.addVariable(parameter));
 
         final Lambda function = new Lambda(Arrays.asList(parameter), lambda);
-        return new MapExpression(new SequenceType(lambda.getType()), input, function);
+        return new MapExpression(new SequenceType(lambda.getType()), input, function, parserTree.getLocation());
     }
 
     private Expression parseRuleReduce(ParserTree parserTree, Scope scope) {
@@ -124,20 +129,23 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
 
         Expression input = parseExpression(inputTree, scope);
         Expression initialValue = parseExpression(initialValueTree, scope);
-        Type type = promoteTypes(initialValue.getType(), input.getType().getInnerType());
+        Type type = promoteTypes(initialValue.getType(), input.getType().getInnerType(), parserTree.getLocation());
         if (!input.getType().isSequence()) {
-            reportError(new TypeError());
+            reportError(new TypeError("Reduce input must be a sequence (was " + input.getType() + ")",
+                    parserTree.getLocation()));
         }
         Variable parameter1 = new Variable(type, parameterTree1.getContent().get());
         Variable parameter2 = new Variable(type, parameterTree2.getContent().get());
 
         Expression lambda = parseExpression(expressionTree, scope.addVariable(parameter1).addVariable(parameter2));
         if (!type.canBeAssignedFrom(lambda.getType())) {
-            reportError(new TypeError());
+            reportError(new TypeError("Lambda return type does not match sequence and initial value (was "
+                    + lambda.getType() + ")",
+                    parserTree.getLocation()));
         }
 
         final Lambda function = new Lambda(Arrays.asList(parameter1, parameter2), lambda);
-        return new ReduceExpression(type, input, initialValue, function);
+        return new ReduceExpression(type, input, initialValue, function, parserTree.getLocation());
     }
 
     private Expression parseRuleNegate(ParserTree parserTree) {
@@ -171,9 +179,13 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
         Operation operation = parseOperation(operationTree);
         Expression rightHandExpression = parseExpression(rightHandExpressionTree, scope);
 
-        Type type = promoteTypes(leftHandExpression.getType(), rightHandExpression.getType());
+        Type leftHandType = leftHandExpression.getType();
+        Type rightHandType = rightHandExpression.getType();
+        Type type = promoteTypes(leftHandType, rightHandType, operationTree.getLocation());
         if (!type.canPerformArithmetic()) {
-            reportError(new TypeError());
+            reportError(new TypeError("Operation arguments must be integers (was "
+                    + leftHandType + " and " + rightHandType + ")",
+                    parserTree.getLocation()));
         }
 
         OperationExpression result = new OperationExpression(type, leftHandExpression, rightHandExpression, operation);
@@ -182,11 +194,11 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
 
     private Expression parseRuleNoOperator(ParserTree parserTree, Expression expression) {
         // No remainder, just return the original expression.
-        assertRule(parserTree);
+        assertRule(parserTree, EPSILON);
         return expression;
     }
 
-    private Type promoteTypes(Type type1, Type type2) {
+    private Type promoteTypes(Type type1, Type type2, SourceRange location) {
         if (type1.equals(Type.UNDETERMINED) || type2.equals(Type.UNDETERMINED)) {
             return Type.UNDETERMINED;
         } else if (type1.canBeAssignedFrom(type2)) {
@@ -194,7 +206,7 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
         } else if (type2.canBeAssignedFrom(type1)) {
             return type2;
         } else {
-            reportError(new TypeError());
+            reportError(new TypeError("Incompatible types " + type1 + " and " + type2, location));
             return Type.UNDETERMINED;
         }
     }
@@ -227,9 +239,9 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
         Expression result;
         final String content = numberTree.getContent().get();
         if (content.contains(".")) {
-            result = new FloatLiteral(Double.parseDouble(content) * factor);
+            result = new FloatLiteral(Double.parseDouble(content) * factor, numberTree.getLocation());
         } else {
-            result = new IntLiteral(Integer.parseInt(content) * factor);
+            result = new IntLiteral(Integer.parseInt(content) * factor, numberTree.getLocation());
         }
         return result;
     }

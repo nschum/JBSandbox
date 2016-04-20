@@ -1,5 +1,7 @@
 package de.nschum.jbsandbox.ast;
 
+import de.nschum.jbsandbox.source.SourceRange;
+
 public class OperationExpression extends Expression {
 
     private Expression leftHandSide;
@@ -7,7 +9,7 @@ public class OperationExpression extends Expression {
     private Operation operation;
 
     public OperationExpression(Type type, Expression leftHandSide, Expression rightHandSide, Operation operation) {
-        super(type);
+        super(type, new SourceRange(leftHandSide.getLocation().getStart(), rightHandSide.getLocation().getEnd()));
         this.leftHandSide = leftHandSide;
         this.rightHandSide = rightHandSide;
         this.operation = operation;

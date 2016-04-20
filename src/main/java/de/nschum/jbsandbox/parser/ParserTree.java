@@ -1,5 +1,7 @@
 package de.nschum.jbsandbox.parser;
 
+import de.nschum.jbsandbox.source.SourceLocation;
+import de.nschum.jbsandbox.source.SourceRange;
 import de.nschum.jbsandbox.grammar.GrammarRule;
 import de.nschum.jbsandbox.grammar.GrammarToken;
 
@@ -19,6 +21,7 @@ public class ParserTree {
     private GrammarRule rule;
     private GrammarToken token;
     private Optional<String> content = Optional.empty();
+    private Optional<SourceRange> location = Optional.empty();
     private List<ParserTree> children = new ArrayList<>();
 
     public ParserTree(GrammarToken token) {
@@ -37,6 +40,10 @@ public class ParserTree {
         this.content = content;
     }
 
+    void setLocation(SourceRange location) {
+        this.location = Optional.of(location);
+    }
+
     public GrammarRule getRule() {
         return rule;
     }
@@ -47,6 +54,18 @@ public class ParserTree {
 
     public Optional<String> getContent() {
         return content;
+    }
+
+    public SourceRange getLocation() {
+        return location.orElseGet(() -> new SourceRange(getLocationStart(), getLocationEnd()));
+    }
+
+    private SourceLocation getLocationStart() {
+        return location.map(SourceRange::getStart).orElseGet(() -> children.get(0).getLocationStart());
+    }
+
+    private SourceLocation getLocationEnd() {
+        return location.map(SourceRange::getEnd).orElseGet(() -> children.get(children.size() - 1).getLocationEnd());
     }
 
     public ParserTree getChild(int i) {

@@ -1,6 +1,7 @@
 package de.nschum.jbsandbox.parser;
 
-import de.nschum.jbsandbox.SourceLocation;
+import de.nschum.jbsandbox.source.SourceLocation;
+import de.nschum.jbsandbox.source.SourceRange;
 import de.nschum.jbsandbox.grammar.Grammar;
 import de.nschum.jbsandbox.grammar.GrammarRule;
 import de.nschum.jbsandbox.grammar.GrammarToken;
@@ -38,10 +39,18 @@ public class Parser {
         ScannerToken nextToken = unreadTokens.next();
 
         while (stack.size() > 0 && !stack.peek().getToken().equals(EOF)) {
-            if (nextToken.getGrammarToken().equals(stack.peek().getToken())) {
+            if (stack.peek().getToken().equals(EPSILON)) {
+                // skip epsilon
+                ParserTree output = stack.pop();
+                output.setContent(Optional.of(""));
+                // has empty length
+                SourceLocation location = nextToken.getLocation().getStart();
+                output.setLocation(new SourceRange(location, location));
+            } else if (stack.peek().getToken().equals(nextToken.getGrammarToken())) {
                 // process terminal and remove it from input
                 ParserTree output = stack.pop();
                 output.setContent(Optional.of(nextToken.getContent()));
+                output.setLocation(nextToken.getLocation());
                 nextToken = unreadTokens.next();
             } else {
                 // apply rule and rewrite stack
@@ -51,13 +60,20 @@ public class Parser {
 
                 for (GrammarToken token : reverse(rule.getRightHandSide())) {
                     tree.setRule(rule);
-                    if (!token.equals(EPSILON)) {
-                        ParserTree newTree = new ParserTree(token);
-                        tree.addChild(newTree);
-                        stack.push(newTree);
-                    }
+                    ParserTree newTree = new ParserTree(token);
+                    tree.addChild(newTree);
+                    stack.push(newTree);
                 }
             }
+        }
+
+        if (stack.size() > 0) {
+            assert stack.peek().getToken().equals(EOF);
+            ParserTree output = stack.pop();
+            output.setContent(Optional.of(""));
+            // has empty length
+            SourceLocation location = nextToken.getLocation().getStart();
+            output.setLocation(new SourceRange(location, location));
         }
 
         if (unreadTokens.hasNext()) {
@@ -71,7 +87,7 @@ public class Parser {
         Optional<GrammarRule> optionalRule = parserTable.getRuleForTerminal(nextToken.getGrammarToken(), state);
         if (!optionalRule.isPresent()) {
             if (nextToken.getGrammarToken().equals(EOF)) {
-                throw new MissingTokenException(state);
+                throw new MissingTokenException(state, nextToken.getLocation());
             } else {
                 throw new UnexpectedTokenException(nextToken);
             }
@@ -84,7 +100,8 @@ public class Parser {
      */
     private Iterator<ScannerToken> iterateWithEOF(List<ScannerToken> tokens) {
         List<ScannerToken> tokensWithEOF = new ArrayList<>(tokens);
-        tokensWithEOF.add(new ScannerToken(EOF, "", new SourceLocation(0, 0)));
+        SourceLocation eofLocation = tokens.get(tokens.size() - 1).getLocation().getEnd();
+        tokensWithEOF.add(new ScannerToken(EOF, "", new SourceRange(eofLocation, eofLocation)));
         return tokensWithEOF.iterator();
     }
 

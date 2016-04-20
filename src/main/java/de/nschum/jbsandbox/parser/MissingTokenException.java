@@ -1,5 +1,6 @@
 package de.nschum.jbsandbox.parser;
 
+import de.nschum.jbsandbox.source.SourceRange;
 import de.nschum.jbsandbox.grammar.GrammarToken;
 
 /**
@@ -7,7 +8,14 @@ import de.nschum.jbsandbox.grammar.GrammarToken;
  */
 public class MissingTokenException extends Exception {
 
-    public MissingTokenException(GrammarToken token) {
+    private final SourceRange location;
+
+    public MissingTokenException(GrammarToken token, SourceRange location) {
         super(token.isTerminal() ? "Expected token " + token : "Expected token");
+        this.location = location;
+    }
+
+    public SourceRange getLocation() {
+        return location;
     }
 }

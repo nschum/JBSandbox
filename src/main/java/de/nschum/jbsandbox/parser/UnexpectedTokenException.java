@@ -1,6 +1,6 @@
 package de.nschum.jbsandbox.parser;
 
-import de.nschum.jbsandbox.SourceLocation;
+import de.nschum.jbsandbox.source.SourceRange;
 import de.nschum.jbsandbox.scanner.ScannerToken;
 
 /**
@@ -8,14 +8,14 @@ import de.nschum.jbsandbox.scanner.ScannerToken;
  */
 public class UnexpectedTokenException extends Exception {
 
-    private final SourceLocation location;
+    private final SourceRange location;
 
     public UnexpectedTokenException(ScannerToken token) {
         super("No rule for parsing " + token.getGrammarToken());
         location = token.getLocation();
     }
 
-    public SourceLocation getLocation() {
+    public SourceRange getLocation() {
         return location;
     }
 }

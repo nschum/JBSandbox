@@ -81,7 +81,8 @@ public class Interpreter {
         int upperBound = (Integer) evaluateExpression(expression.getUpperBound(), state).get();
 
         if (lowerBound > upperBound) {
-            throw new InterpreterRuntimeException("Invalid range, lower bound is greater than upper bound");
+            throw new InterpreterRuntimeException("Invalid range, lower bound is greater than upper bound",
+                    expression.getLocation());
         }
         return new Value(new IntRange(lowerBound, upperBound));
     }
@@ -152,7 +153,7 @@ public class Interpreter {
                     return new Value((Integer) lhs * (Integer) rhs);
                 case DIVIDE:
                     if ((Integer) rhs == 0) {
-                        throw new InterpreterRuntimeException("Division by zero");
+                        throw new InterpreterRuntimeException("Division by zero", expression.getLocation());
                     }
                     return new Value((Integer) lhs / (Integer) rhs);
                 case EXP:

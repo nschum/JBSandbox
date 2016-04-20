@@ -1,4 +1,4 @@
-package de.nschum.jbsandbox;
+package de.nschum.jbsandbox.source;
 
 /**
  * Represents a position in the parsed source code

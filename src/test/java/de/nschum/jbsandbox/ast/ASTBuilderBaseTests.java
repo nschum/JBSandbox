@@ -8,8 +8,10 @@ import de.nschum.jbsandbox.parser.UnexpectedTokenException;
 import de.nschum.jbsandbox.scanner.IllegalTokenException;
 import de.nschum.jbsandbox.scanner.JBScanner;
 import de.nschum.jbsandbox.scanner.ScannerToken;
+import de.nschum.jbsandbox.source.SourceFile;
 import org.junit.Before;
 
+import java.io.StringReader;
 import java.util.List;
 
 import static org.hamcrest.Matchers.empty;
@@ -30,7 +32,8 @@ public class ASTBuilderBaseTests {
     protected Program parse(final String program)
             throws IllegalTokenException, UnexpectedTokenException, MissingTokenException {
 
-        List<ScannerToken> tokens = new JBScanner().scan(program);
+        SourceFile file = new SourceFile("-", new StringReader(program));
+        List<ScannerToken> tokens = new JBScanner().scan(file);
         ParserTree parseTree = new Parser(grammar).parse(tokens);
 
         return astBuilder.createSyntaxTree(parseTree);

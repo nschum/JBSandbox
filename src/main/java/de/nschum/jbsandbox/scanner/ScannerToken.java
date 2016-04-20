@@ -1,6 +1,6 @@
 package de.nschum.jbsandbox.scanner;
 
-import de.nschum.jbsandbox.SourceLocation;
+import de.nschum.jbsandbox.source.SourceRange;
 import de.nschum.jbsandbox.grammar.GrammarToken;
 
 /**
@@ -10,9 +10,9 @@ public class ScannerToken {
 
     private GrammarToken grammarToken;
     private String content;
-    private SourceLocation location;
+    private SourceRange location;
 
-    public ScannerToken(GrammarToken grammarToken, String content, SourceLocation location) {
+    public ScannerToken(GrammarToken grammarToken, String content, SourceRange location) {
         assert grammarToken != null;
         assert content != null;
         assert location != null;
@@ -38,7 +38,7 @@ public class ScannerToken {
     /**
      * Returns the location of this token
      */
-    public SourceLocation getLocation() {
+    public SourceRange getLocation() {
         return location;
     }
 

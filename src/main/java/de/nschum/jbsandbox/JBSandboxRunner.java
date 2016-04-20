@@ -13,6 +13,7 @@ import de.nschum.jbsandbox.parser.UnexpectedTokenException;
 import de.nschum.jbsandbox.scanner.IllegalTokenException;
 import de.nschum.jbsandbox.scanner.JBScanner;
 import de.nschum.jbsandbox.scanner.ScannerToken;
+import de.nschum.jbsandbox.source.SourceFile;
 
 import java.io.*;
 import java.util.List;
@@ -27,21 +28,38 @@ public class JBSandboxRunner {
             printUsage();
             System.exit(1);
         }
-        String path = args[0];
 
+        SourceFile file;
         try {
-            List<ASTError> errors = run(createReader(path));
-            printErrors(errors);
+            file = createFile(args[0]);
+        } catch (FileNotFoundException e) {
+            System.err.println("Could not read: " + e.getMessage());
+            System.exit(1);
+            return;
+        }
+
+        ErrorPrinter errorPrinter = new ErrorPrinter();
+        try {
+            List<ASTError> errors = run(file);
+            errors.forEach(e -> errorPrinter.print(e.getMessage(), file, e.getLocation()));
         } catch (IOException e) {
             System.err.println("Could not read: " + e.getMessage());
         } catch (IllegalTokenException e) {
-            System.err.println("Illegal token: " + humanReadableLocation(path, e.getLocation()));
+            errorPrinter.print("Illegal token", file, e.getLocation());
         } catch (UnexpectedTokenException e) {
-            System.err.println("Unexpected token: " + humanReadableLocation(path, e.getLocation()));
+            errorPrinter.print("Unexpected token", file, e.getLocation());
         } catch (MissingTokenException e) {
-            System.err.println("Unexpected end of input: " + e.getMessage());
+            errorPrinter.print(e.getMessage(), file, e.getLocation());
         } catch (InterpreterRuntimeException e) {
-            System.err.println("Runtime error: " + e.getMessage());
+            errorPrinter.print(e.getMessage(), file, e.getLocation());
+        }
+    }
+
+    private static SourceFile createFile(String path) throws FileNotFoundException {
+        if (path.equals("-")) {
+            return new SourceFile("-", new InputStreamReader(System.in));
+        } else {
+            return new SourceFile(new File(path).getName(), new FileReader(path));
         }
     }
 
@@ -60,24 +78,14 @@ public class JBSandboxRunner {
         System.err.println("  FILE:\tThe file to parse or \"-\" for reading a program from stdin");
     }
 
-    private static void printErrors(List<ASTError> errors) {
-        for (ASTError error : errors) {
-            System.err.println("Parse error");
-        }
-    }
-
-    private static String humanReadableLocation(String path, SourceLocation location) {
-        return new File(path).getName() + ":" + (location.getLine() + 1) + ":" + (location.getColumn() + 1);
-    }
-
-    private static List<ASTError> run(Reader input)
+    private static List<ASTError> run(SourceFile file)
             throws IllegalTokenException, UnexpectedTokenException, MissingTokenException, IOException,
             InterpreterRuntimeException {
 
         JBGrammar grammar = new JBGrammar();
         Parser parser = new Parser(grammar);
 
-        List<ScannerToken> tokens = new JBScanner().scan(input);
+        List<ScannerToken> tokens = new JBScanner().scan(file);
         ParserTree parserTree = parser.parse(tokens);
         ASTBuilder astBuilder = new ASTBuilder(grammar);
         Program syntaxTree = astBuilder.createSyntaxTree(parserTree);

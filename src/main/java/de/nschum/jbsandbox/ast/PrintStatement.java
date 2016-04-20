@@ -1,10 +1,13 @@
 package de.nschum.jbsandbox.ast;
 
+import de.nschum.jbsandbox.source.SourceRange;
+
 public class PrintStatement extends Statement {
 
     private String string;
 
-    public PrintStatement(String string) {
+    public PrintStatement(String string, SourceRange location) {
+        super(location);
         this.string = string;
     }
 
