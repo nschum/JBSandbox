@@ -12,6 +12,8 @@ import java.util.Optional;
 public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHandler {
 
     private JTextPane textPane;
+    private EditorWindowStatusBar statusBar;
+
     private Optional<File> file = Optional.empty();
     private EditorWindowMenuBar menu;
     private UndoManager undoManager = new UndoManager();
@@ -43,6 +45,9 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
 
         JScrollPane scrollPane = new JScrollPane(textPane);
         add(scrollPane);
+
+        statusBar = new EditorWindowStatusBar();
+        add(statusBar, BorderLayout.SOUTH);
 
         if (!"true".equals(System.getProperty("apple.laf.useScreenMenuBar"))) {
             setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
