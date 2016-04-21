@@ -1,9 +1,9 @@
 package de.nschum.jbsandbox.parser;
 
-import de.nschum.jbsandbox.source.SourceLocation;
-import de.nschum.jbsandbox.source.SourceRange;
 import de.nschum.jbsandbox.grammar.GrammarRule;
 import de.nschum.jbsandbox.grammar.GrammarToken;
+import de.nschum.jbsandbox.source.SourceLocation;
+import de.nschum.jbsandbox.source.SourceRange;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,11 +61,21 @@ public class ParserTree {
     }
 
     private SourceLocation getLocationStart() {
-        return location.map(SourceRange::getStart).orElseGet(() -> children.get(0).getLocationStart());
+        // Find the leftmost leaf/terminal and get its start position. Don't use recursion because of tree depth.
+        ParserTree parserTree = this;
+        while (!parserTree.location.isPresent()) {
+            parserTree = parserTree.children.get(0);
+        }
+        return parserTree.location.get().getStart();
     }
 
     private SourceLocation getLocationEnd() {
-        return location.map(SourceRange::getEnd).orElseGet(() -> children.get(children.size() - 1).getLocationEnd());
+        // Find the leftmost leaf/terminal and get its start position. Don't use recursion because of tree depth.
+        ParserTree parserTree = this;
+        while (!parserTree.location.isPresent()) {
+            parserTree = parserTree.children.get(parserTree.children.size() - 1);
+        }
+        return parserTree.location.get().getEnd();
     }
 
     public ParserTree getChild(int i) {
