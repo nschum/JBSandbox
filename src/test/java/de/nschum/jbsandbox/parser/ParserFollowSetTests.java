@@ -54,7 +54,7 @@ public class ParserFollowSetTests {
         Grammar grammar = mockGrammarWithRules();
 
         // when
-        ParserFollowSets parserFollowSets = new ParserFollowSets(grammar, null);
+        ParserFollowSets parserFollowSets = new ParserFollowSets(grammar, firstSetsMock);
 
         // then
         assertThat(parserFollowSets.getFollowSet(S), containsInAnyOrder(EOF));
