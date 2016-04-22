@@ -1,5 +1,7 @@
 package de.nschum.jbsandbox.ui;
 
+import de.nschum.jbsandbox.source.SourceFile;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.undo.UndoManager;
@@ -8,7 +10,10 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.Optional;
+
+import static java.util.stream.Collectors.joining;
 
 public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHandler {
 
@@ -25,6 +30,7 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
     private Optional<File> file = Optional.empty();
     private EditorWindowMenuBar menu;
     private UndoManager undoManager = new UndoManager();
+    private BackgroundParser backgroundParser = new BackgroundParser();
 
     private boolean logVisible = false;
     private int lastDividerHeight = DIVIDER_HEIGHT_DEFAULT;
@@ -52,6 +58,7 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
             undoManager.addEdit(e.getEdit());
             updateUndo();
             setModified(true);
+            restartParse();
         });
 
         editorScrollPane = new JScrollPane(textPane);
@@ -83,6 +90,12 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
         if (!"true".equals(System.getProperty("apple.laf.useScreenMenuBar"))) {
             setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         }
+
+        backgroundParser.addResultListener(parseResult -> {
+            java.util.List<ParseError> errors = parseResult.getErrors();
+            logTextArea.setText(errors.stream().map(ParseError::getMessage).collect(joining("\n")));
+            statusBar.setErrorCount(errors.size());
+        });
     }
 
     private void updateUndo() {
@@ -125,8 +138,12 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
     }
 
     private void setModified(boolean modified) {
-        setTitle(file.map(File::getName).orElse("Untitled") + (modified ? " (modified)" : ""));
+        setTitle(getFileName() + (modified ? " (modified)" : ""));
         getRootPane().putClientProperty("Window.documentModifieduu", modified);
+    }
+
+    private String getFileName() {
+        return file.map(File::getName).orElse("Untitled");
     }
 
     private void setLogVisible(boolean logVisible) {
@@ -149,6 +166,10 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
 
         revalidate();
         textPane.requestFocusInWindow();
+    }
+
+    private void restartParse() {
+        backgroundParser.parse(new SourceFile(getFileName(), new StringReader(textPane.getText())));
     }
 
     // MenuHandler
@@ -180,12 +201,14 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
     public void menuItemUndoSelected(ActionEvent e) {
         undoManager.undo();
         updateUndo();
+        restartParse();
     }
 
     @Override
     public void menuItemRedoSelected(ActionEvent e) {
         undoManager.redo();
         updateUndo();
+        restartParse();
     }
 
     @Override

@@ -24,7 +24,7 @@ public class EditorWindowStatusBar extends JPanel {
 
         add(Box.createGlue());
 
-        error = new StatusBarButton("0 errors");
+        error = new StatusBarButton("");
         error.setClickable(true);
         error.setHorizontalAlignment(SwingConstants.RIGHT);
         setErrorSelected(false);
@@ -33,6 +33,19 @@ public class EditorWindowStatusBar extends JPanel {
 
     public void addErrorActionListener(ActionListener actionListener) {
         error.addActionListener(actionListener);
+    }
+
+    public void setErrorCount(int count) {
+        switch (count) {
+            case 0:
+                error.setText("");
+                break;
+            case 1:
+                error.setText("1 error");
+                break;
+            default:
+                error.setText(count + " errors");
+        }
     }
 
     public void setErrorSelected(boolean errorSelected) {
