@@ -1,6 +1,7 @@
 package de.nschum.jbsandbox.ui;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.undo.UndoManager;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -11,12 +12,22 @@ import java.util.Optional;
 
 public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHandler {
 
+    private static final int DIVIDER_HEIGHT_MIN = 75;
+    private static final int DIVIDER_HEIGHT_DEFAULT = 200;
+
     private JTextPane textPane;
+    private JScrollPane editorScrollPane;
     private EditorWindowStatusBar statusBar;
+    private JSplitPane logSplitPane;
+    private JScrollPane logScrollPane;
+    private JTextArea logTextArea;
 
     private Optional<File> file = Optional.empty();
     private EditorWindowMenuBar menu;
     private UndoManager undoManager = new UndoManager();
+
+    private boolean logVisible = false;
+    private int lastDividerHeight = DIVIDER_HEIGHT_DEFAULT;
 
     public static EditorWindow showNewEditorWindow(Optional<File> file) {
         EditorWindow editor = new EditorWindow(file);
@@ -43,10 +54,30 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
             setModified(true);
         });
 
-        JScrollPane scrollPane = new JScrollPane(textPane);
-        add(scrollPane);
+        editorScrollPane = new JScrollPane(textPane);
+        add(editorScrollPane);
+
+        logTextArea = new JTextArea();
+        logTextArea.setEditable(false);
+        logTextArea.setBackground(Color.LIGHT_GRAY);
+        logTextArea.setBorder(new EmptyBorder(0, 0, 0, 0));
+
+        logScrollPane = new JScrollPane(logTextArea);
+
+        logSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        logSplitPane.setBorder(new EmptyBorder(0, 0, 0, 0));
+        logSplitPane.setResizeWeight(1.0);
+        logSplitPane.setDividerSize(3);
+        logSplitPane.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY, e -> {
+            lastDividerHeight = getHeight() - (Integer) e.getNewValue();
+            if (lastDividerHeight < DIVIDER_HEIGHT_MIN) {
+                lastDividerHeight = DIVIDER_HEIGHT_DEFAULT;
+                setLogVisible(false);
+            }
+        });
 
         statusBar = new EditorWindowStatusBar();
+        statusBar.addErrorActionListener(e -> setLogVisible(!logVisible));
         add(statusBar, BorderLayout.SOUTH);
 
         if (!"true".equals(System.getProperty("apple.laf.useScreenMenuBar"))) {
@@ -96,6 +127,27 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
     private void setModified(boolean modified) {
         setTitle(file.map(File::getName).orElse("Untitled") + (modified ? " (modified)" : ""));
         getRootPane().putClientProperty("Window.documentModifieduu", modified);
+    }
+
+    private void setLogVisible(boolean logVisible) {
+        this.logVisible = logVisible;
+        statusBar.setErrorSelected(logVisible);
+
+        if (logVisible) {
+            remove(editorScrollPane);
+            logSplitPane.setTopComponent(editorScrollPane);
+            logSplitPane.setBottomComponent(logScrollPane);
+            logSplitPane.setDividerLocation(getHeight() - lastDividerHeight);
+            add(logSplitPane);
+        } else {
+            logSplitPane.remove(logSplitPane.getLeftComponent());
+            logSplitPane.remove(logSplitPane.getRightComponent());
+            remove(logSplitPane);
+            add(editorScrollPane);
+        }
+
+        revalidate();
+        textPane.requestFocusInWindow();
     }
 
     // MenuHandler
