@@ -132,6 +132,7 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
     private void setLogVisible(boolean logVisible) {
         this.logVisible = logVisible;
         statusBar.setErrorSelected(logVisible);
+        menu.setErrorsVisible(logVisible);
 
         if (logVisible) {
             remove(editorScrollPane);
@@ -205,5 +206,10 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
     @Override
     public void menuItemSelectAllSelected(ActionEvent e) {
         textPane.selectAll();
+    }
+
+    @Override
+    public void menuItemErrorsSelected(ActionEvent e) {
+        setLogVisible(!logVisible);
     }
 }

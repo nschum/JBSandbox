@@ -21,6 +21,7 @@ class EditorWindowMenuBar extends JMenuBar {
     private JMenuItem redo;
     private JMenuItem cut;
     private JMenuItem copy;
+    private JCheckBoxMenuItem errors;
 
     EditorWindowMenuBar(MenuHandler menuHandler) {
         assert menuHandler != null;
@@ -29,6 +30,7 @@ class EditorWindowMenuBar extends JMenuBar {
 
         add(createFileMenu());
         add(createEditMenu());
+        add(createViewMenu());
 
         setCopyCutEnabled(false);
         setUndoTitle(Optional.empty());
@@ -72,6 +74,15 @@ class EditorWindowMenuBar extends JMenuBar {
         return menu;
     }
 
+    private Component createViewMenu() {
+        JMenu menu = new JMenu("View");
+        errors = new JCheckBoxMenuItem("Errors");
+        errors.addActionListener(menuHandler::menuItemErrorsSelected);
+        errors.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, ACCELERATOR));
+        menu.add(errors);
+        return menu;
+    }
+
     void setCopyCutEnabled(boolean enabled) {
         cut.setEnabled(enabled);
         copy.setEnabled(enabled);
@@ -85,6 +96,10 @@ class EditorWindowMenuBar extends JMenuBar {
     void setRedoTitle(Optional<String> redoTitle) {
         redo.setEnabled(redoTitle.isPresent());
         redo.setText(redoTitle.orElse("Redo"));
+    }
+
+    void setErrorsVisible(boolean visible) {
+        errors.setSelected(visible);
     }
 
     interface MenuHandler {
@@ -108,6 +123,8 @@ class EditorWindowMenuBar extends JMenuBar {
         default void menuItemPasteSelected(ActionEvent e) {
         }
         default void menuItemSelectAllSelected(ActionEvent e) {
+        }
+        default void menuItemErrorsSelected(ActionEvent e) {
         }
     }
 }
