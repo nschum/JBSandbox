@@ -8,6 +8,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.undo.UndoManager;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -51,13 +52,20 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
         menu = new EditorWindowMenuBar(this);
         setJMenuBar(menu);
 
-        textPane = new JTextPane();
+        textPane = new JTextPane() {
+            @Override
+            public String getToolTipText(MouseEvent event) {
+                int position = viewToModel(event.getPoint());
+                return getErrorForPosition(position).orElse(null);
+            }
+        };
         textPane.setCaretPosition(0);
         textPane.setMargin(new Insets(5, 5, 5, 5));
         textPane.addCaretListener(e -> {
             menu.setCopyCutEnabled(textPane.getSelectedText() != null);
             updateStatusBar();
         });
+        ToolTipManager.sharedInstance().registerComponent(textPane);
 
         file.ifPresent(this::readFile);
         textPane.getDocument().addUndoableEditListener(e -> {
