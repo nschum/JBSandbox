@@ -1,6 +1,7 @@
 package de.nschum.jbsandbox.ui;
 
 import de.nschum.jbsandbox.source.SourceFile;
+import de.nschum.jbsandbox.source.SourceRange;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -28,6 +29,7 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
     private JTextArea logTextArea;
 
     private Optional<File> file = Optional.empty();
+    private Optional<ParseResult> parseResult = Optional.empty();
     private EditorWindowMenuBar menu;
     private UndoManager undoManager = new UndoManager();
     private BackgroundParser backgroundParser = new BackgroundParser();
@@ -52,7 +54,10 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
         textPane = new JTextPane();
         textPane.setCaretPosition(0);
         textPane.setMargin(new Insets(5, 5, 5, 5));
-        textPane.addCaretListener(e -> menu.setCopyCutEnabled(textPane.getSelectedText() != null));
+        textPane.addCaretListener(e -> {
+            menu.setCopyCutEnabled(textPane.getSelectedText() != null);
+            updateStatusBar();
+        });
 
         file.ifPresent(this::readFile);
         textPane.getDocument().addUndoableEditListener(e -> {
@@ -60,6 +65,8 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
             updateUndo();
             setModified(true);
             restartParse();
+            setParseResult(Optional.empty());
+            updateStatusBar();
         });
         errorHighlighter = new ErrorHighlighter(textPane.getHighlighter());
 
@@ -94,10 +101,7 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
         }
 
         backgroundParser.addResultListener(parseResult -> {
-            java.util.List<ParseError> errors = parseResult.getErrors();
-            logTextArea.setText(errors.stream().map(ParseError::getMessage).collect(joining("\n")));
-            statusBar.setErrorCount(errors.size());
-            errorHighlighter.highlightErrors(parseResult.getSourceFile(), parseResult.getErrors());
+            setParseResult(Optional.of(parseResult));
         });
         restartParse();
     }
@@ -174,6 +178,39 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
 
     private void restartParse() {
         backgroundParser.parse(new SourceFile(getFileName(), new StringReader(textPane.getText())));
+    }
+
+    private void updateStatusBar() {
+        int caretPosition = textPane.getCaretPosition();
+        statusBar.setText(getErrorForPosition(caretPosition).orElse(""));
+    }
+
+    private Optional<String> getErrorForPosition(int position) {
+        return parseResult.flatMap(pr -> {
+            SourceFile sourceFile = pr.getSourceFile();
+            return pr.getErrors().stream()
+                    .filter(paresError -> {
+                        SourceRange location = paresError.getLocation();
+                        int start = sourceFile.offsetForLocation(location.getStart());
+                        int end = sourceFile.offsetForLocation(location.getEnd());
+                        return start <= position && position <= end;
+                    })
+                    .map(ParseError::getMessage)
+                    .findFirst();
+
+        });
+    }
+
+    public void setParseResult(Optional<ParseResult> parseResult) {
+        this.parseResult = parseResult;
+
+        parseResult.ifPresent(pr -> {
+            java.util.List<ParseError> errors = pr.getErrors();
+            logTextArea.setText(errors.stream().map(ParseError::getMessage).collect(joining("\n")));
+            statusBar.setErrorCount(errors.size());
+            errorHighlighter.highlightErrors(pr.getSourceFile(), errors);
+            updateStatusBar();
+        });
     }
 
     // MenuHandler
