@@ -31,6 +31,7 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
     private EditorWindowMenuBar menu;
     private UndoManager undoManager = new UndoManager();
     private BackgroundParser backgroundParser = new BackgroundParser();
+    private ErrorHighlighter errorHighlighter;
 
     private boolean logVisible = false;
     private int lastDividerHeight = DIVIDER_HEIGHT_DEFAULT;
@@ -60,6 +61,7 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
             setModified(true);
             restartParse();
         });
+        errorHighlighter = new ErrorHighlighter(textPane.getHighlighter());
 
         editorScrollPane = new JScrollPane(textPane);
         add(editorScrollPane);
@@ -95,7 +97,9 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
             java.util.List<ParseError> errors = parseResult.getErrors();
             logTextArea.setText(errors.stream().map(ParseError::getMessage).collect(joining("\n")));
             statusBar.setErrorCount(errors.size());
+            errorHighlighter.highlightErrors(parseResult.getSourceFile(), parseResult.getErrors());
         });
+        restartParse();
     }
 
     private void updateUndo() {
