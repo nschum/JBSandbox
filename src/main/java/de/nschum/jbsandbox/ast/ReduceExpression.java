@@ -3,6 +3,7 @@ package de.nschum.jbsandbox.ast;
 import de.nschum.jbsandbox.source.SourceRange;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class ReduceExpression extends Expression {
 
@@ -28,5 +29,13 @@ public class ReduceExpression extends Expression {
 
     public Lambda getFunction() {
         return function;
+    }
+
+    @Override
+    public void visit(Consumer<SyntaxTree> visitor) {
+        super.visit(visitor);
+        input.visit(visitor);
+        initialValue.visit(visitor);
+        function.visit(visitor);
     }
 }

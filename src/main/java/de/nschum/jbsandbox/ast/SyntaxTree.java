@@ -3,6 +3,7 @@ package de.nschum.jbsandbox.ast;
 import de.nschum.jbsandbox.source.SourceRange;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * The abstract syntax tree
@@ -28,6 +29,14 @@ public abstract class SyntaxTree {
 
     public List<Terminal> getTerminals() {
         return terminals;
+    }
+
+    /**
+     * Visit tree recursively and call visitor with each node
+     */
+    public void visit(Consumer<SyntaxTree> visitor) {
+        visitor.accept(this);
+        terminals.stream().forEach(visitor::accept);
     }
 
     @Override

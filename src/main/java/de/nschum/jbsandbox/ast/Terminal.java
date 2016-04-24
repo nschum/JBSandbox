@@ -4,6 +4,7 @@ import de.nschum.jbsandbox.grammar.GrammarToken;
 import de.nschum.jbsandbox.source.SourceRange;
 
 import java.util.Collections;
+import java.util.function.Consumer;
 
 public class Terminal extends SyntaxTree {
 
@@ -16,6 +17,10 @@ public class Terminal extends SyntaxTree {
 
     public GrammarToken getToken() {
         return token;
+    }
+
+    public void visit(Consumer<SyntaxTree> visitor) {
+        visitor.accept(this);
     }
 
     @Override

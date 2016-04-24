@@ -3,6 +3,7 @@ package de.nschum.jbsandbox.ast;
 import de.nschum.jbsandbox.source.SourceRange;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class OperationExpression extends Expression {
 
@@ -37,5 +38,12 @@ public class OperationExpression extends Expression {
                 + "(" + leftHandSide.toString() + ") "
                 + operation.toString() +
                 " (" + rightHandSide.toString() + ")";
+    }
+
+    @Override
+    public void visit(Consumer<SyntaxTree> visitor) {
+        super.visit(visitor);
+        leftHandSide.visit(visitor);
+        rightHandSide.visit(visitor);
     }
 }

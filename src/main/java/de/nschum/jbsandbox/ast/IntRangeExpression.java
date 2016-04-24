@@ -3,6 +3,7 @@ package de.nschum.jbsandbox.ast;
 import de.nschum.jbsandbox.source.SourceRange;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class IntRangeExpression extends Expression {
 
@@ -22,5 +23,12 @@ public class IntRangeExpression extends Expression {
 
     public Expression getUpperBound() {
         return upperBound;
+    }
+
+    @Override
+    public void visit(Consumer<SyntaxTree> visitor) {
+        super.visit(visitor);
+        lowerBound.visit(visitor);
+        upperBound.visit(visitor);
     }
 }

@@ -3,6 +3,7 @@ package de.nschum.jbsandbox.ast;
 import de.nschum.jbsandbox.source.SourceRange;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class Lambda extends SyntaxTree {
 
@@ -21,5 +22,11 @@ public class Lambda extends SyntaxTree {
 
     public Expression getExpression() {
         return expression;
+    }
+
+    @Override
+    public void visit(Consumer<SyntaxTree> visitor) {
+        super.visit(visitor);
+        expression.visit(visitor);
     }
 }
