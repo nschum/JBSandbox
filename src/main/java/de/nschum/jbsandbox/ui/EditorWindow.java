@@ -15,8 +15,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.Optional;
 
-import static java.util.stream.Collectors.joining;
-
 public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHandler {
 
     private static final int DIVIDER_HEIGHT_MIN = 75;
@@ -27,7 +25,7 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
     private EditorWindowStatusBar statusBar;
     private JSplitPane logSplitPane;
     private JScrollPane logScrollPane;
-    private JTextArea logTextArea;
+    private LogTextArea logTextArea = new LogTextArea();
 
     private Optional<File> file = Optional.empty();
     private Optional<ParseResult> parseResult = Optional.empty();
@@ -81,10 +79,11 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
         editorScrollPane = new JScrollPane(textPane);
         add(editorScrollPane);
 
-        logTextArea = new JTextArea();
-        logTextArea.setEditable(false);
-        logTextArea.setBackground(Color.LIGHT_GRAY);
-        logTextArea.setBorder(new EmptyBorder(0, 0, 0, 0));
+        logTextArea.addSelectionListener(error -> {
+            SourceFile sourceFile = parseResult.get().getSourceFile();
+            textPane.setSelectionStart(sourceFile.offsetForLocation(error.getLocation().getStart()));
+            textPane.setSelectionEnd(sourceFile.offsetForLocation(error.getLocation().getEnd()));
+        });
 
         logScrollPane = new JScrollPane(logTextArea);
 
@@ -214,7 +213,7 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
 
         parseResult.ifPresent(pr -> {
             java.util.List<ParseError> errors = pr.getErrors();
-            logTextArea.setText(errors.stream().map(ParseError::getMessage).collect(joining("\n")));
+            logTextArea.setErrors(errors);
             statusBar.setErrorCount(errors.size());
             errorHighlighter.highlightErrors(pr.getSourceFile(), errors);
             updateStatusBar();

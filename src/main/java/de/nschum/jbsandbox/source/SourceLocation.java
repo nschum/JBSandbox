@@ -42,4 +42,11 @@ public class SourceLocation {
     public String toString() {
         return line + ":" + column;
     }
+
+    /**
+     * Pretty-print location and convert indexing to start with 1
+     */
+    public String toHumanReadableString() {
+        return (line + 1) + ":" + (column + 1);
+    }
 }

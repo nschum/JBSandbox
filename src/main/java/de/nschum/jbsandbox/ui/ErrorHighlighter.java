@@ -88,8 +88,6 @@ public class ErrorHighlighter {
             }
             g.setClip(character);
             underline(g, character.x, character.y, character.width, character.height);
-            g.setStroke(new BasicStroke(1));
-            g.draw(new Rectangle(character));
         }
 
         protected abstract void underline(Graphics2D g, int x, int y, int width, int height);

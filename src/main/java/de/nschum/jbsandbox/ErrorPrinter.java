@@ -15,8 +15,7 @@ public class ErrorPrinter {
     public void print(String message, SourceFile file, SourceRange location) {
         System.err.println(message + ": "
                 + file.getName() + ":"
-                + humanReadableLocation(location.getStart()) + "-"
-                + humanReadableLocation(location.getEnd()));
+                + location.toHumanReadableString());
         if (location.isSingleLine()) {
             if (location.isSinglePoint()) {
                 printPointedAtSourceLine(file, location.getStart());
@@ -32,15 +31,8 @@ public class ErrorPrinter {
     public void print(String message, SourceFile file, SourceLocation location) {
         System.err.println(message + ": "
                 + file.getName() + ":"
-                + humanReadableLocation(location));
+                + location.toHumanReadableString());
         printPointedAtSourceLine(file, location);
-    }
-
-    /**
-     * Pretty-print a location and convert indexing to start with 1
-     */
-    private String humanReadableLocation(SourceLocation location) {
-        return (location.getLine() + 1) + ":" + (location.getColumn() + 1);
     }
 
     /**
