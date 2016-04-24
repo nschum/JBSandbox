@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.util.Optional;
 
@@ -22,6 +23,8 @@ class EditorWindowMenuBar extends JMenuBar {
     private JMenuItem cut;
     private JMenuItem copy;
     private JCheckBoxMenuItem errors;
+    private JMenuItem nextError;
+    private JMenuItem previousError;
 
     EditorWindowMenuBar(MenuHandler menuHandler) {
         assert menuHandler != null;
@@ -35,6 +38,7 @@ class EditorWindowMenuBar extends JMenuBar {
         setCopyCutEnabled(false);
         setUndoTitle(Optional.empty());
         setRedoTitle(Optional.empty());
+        setErrorNavigationEnabled(false);
     }
 
     private JMenuItem createMenuItem(String text, ActionListener actionListener, int key) {
@@ -80,6 +84,12 @@ class EditorWindowMenuBar extends JMenuBar {
         errors.addActionListener(menuHandler::menuItemErrorsSelected);
         errors.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, ACCELERATOR));
         menu.add(errors);
+        nextError = createMenuItem("Jump to Next Error", menuHandler::menuItemNextErrorSelected,
+                KeyEvent.VK_L, SHIFT_DOWN_MASK);
+        menu.add(nextError);
+        previousError = createMenuItem("Jump to Previous Error", menuHandler::menuItemPreviousErrorSelected,
+                KeyEvent.VK_L, SHIFT_DOWN_MASK | InputEvent.ALT_DOWN_MASK);
+        menu.add(previousError);
         return menu;
     }
 
@@ -100,6 +110,11 @@ class EditorWindowMenuBar extends JMenuBar {
 
     void setErrorsVisible(boolean visible) {
         errors.setSelected(visible);
+    }
+
+    void setErrorNavigationEnabled(boolean enabled) {
+        nextError.setEnabled(enabled);
+        previousError.setEnabled(enabled);
     }
 
     interface MenuHandler {
@@ -125,6 +140,10 @@ class EditorWindowMenuBar extends JMenuBar {
         default void menuItemSelectAllSelected(ActionEvent e) {
         }
         default void menuItemErrorsSelected(ActionEvent e) {
+        }
+        default void menuItemNextErrorSelected(ActionEvent e) {
+        }
+        default void menuItemPreviousErrorSelected(ActionEvent e) {
         }
     }
 }
