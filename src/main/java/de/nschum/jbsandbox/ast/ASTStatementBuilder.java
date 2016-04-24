@@ -48,7 +48,7 @@ public class ASTStatementBuilder extends ASTBaseBuilder {
         // Add new variable to scope for following statements.
         scopes.push(scope.addVariable(variable));
 
-        return new Declaration(variable, expression, parserTree.getLocation());
+        return new Declaration(variable, expression, parseTerminals(parserTree), parserTree.getLocation());
     }
 
     private Statement parseRuleOutStatement(ParserTree parserTree, Scope scope) {
@@ -56,7 +56,8 @@ public class ASTStatementBuilder extends ASTBaseBuilder {
 
         ParserTree expressionTree = parserTree.getChild(1);
 
-        return new OutStatement(parseExpression(expressionTree, scope), parserTree.getLocation());
+        return new OutStatement(parseExpression(expressionTree, scope),
+                parseTerminals(parserTree), parserTree.getLocation());
     }
 
     private Statement parseRulePrintStatement(ParserTree parserTree) {
@@ -64,7 +65,7 @@ public class ASTStatementBuilder extends ASTBaseBuilder {
 
         ParserTree stringTree = parserTree.getChild(1);
 
-        return new PrintStatement(parseString(stringTree), parserTree.getLocation());
+        return new PrintStatement(parseString(stringTree), parseTerminals(parserTree), parserTree.getLocation());
     }
 
     private Expression parseExpression(ParserTree parserTree, Scope scope) {

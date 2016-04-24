@@ -1,5 +1,6 @@
 package de.nschum.jbsandbox.ast;
 
+import de.nschum.jbsandbox.grammar.GrammarToken;
 import de.nschum.jbsandbox.grammar.JBGrammar;
 import de.nschum.jbsandbox.parser.MissingTokenException;
 import de.nschum.jbsandbox.parser.Parser;
@@ -9,12 +10,14 @@ import de.nschum.jbsandbox.scanner.IllegalTokenException;
 import de.nschum.jbsandbox.scanner.JBScanner;
 import de.nschum.jbsandbox.scanner.ScannerToken;
 import de.nschum.jbsandbox.source.SourceFile;
+import de.nschum.jbsandbox.source.SourceRange;
+import org.hamcrest.Matcher;
 import org.junit.Before;
 
 import java.io.StringReader;
 import java.util.List;
 
-import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 public class ASTBuilderBaseTests {
@@ -25,6 +28,14 @@ public class ASTBuilderBaseTests {
     @Before
     public void setUp() throws Exception {
         astBuilder = new ASTBuilder(grammar);
+    }
+
+    // matchers
+
+    protected Matcher<Object> terminal(GrammarToken token, int start, int end) {
+        return allOf(
+                hasProperty("token", equalTo(token)),
+                hasProperty("location", equalTo(new SourceRange(0, start, 0, end))));
     }
 
     // helpers

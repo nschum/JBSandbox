@@ -5,6 +5,8 @@ import de.nschum.jbsandbox.source.SourceRange;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.text.AbstractDocument;
 import javax.swing.undo.UndoManager;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -37,6 +39,7 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
     private EditorWindowMenuBar menu;
     private UndoManager undoManager = new UndoManager();
     private ErrorHighlighter errorHighlighter;
+    private SyntaxHighlighter syntaxHighlighter;
 
     private boolean logVisible = false;
     private int lastDividerHeight = DIVIDER_HEIGHT_DEFAULT;
@@ -67,13 +70,18 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
 
         file.ifPresent(this::readFile);
         textPane.getDocument().addUndoableEditListener(e -> {
-            undoManager.addEdit(e.getEdit());
-            updateUndo();
-            setModified(true);
-            delegate.documentChanged();
-            updateStatusBar();
+            // skip style changes, because they only come from the SyntaxHighlighter
+            DocumentEvent.EventType type = ((AbstractDocument.DefaultDocumentEvent) e.getEdit()).getType();
+            if (!type.equals(DocumentEvent.EventType.CHANGE)) {
+                undoManager.addEdit(e.getEdit());
+                updateUndo();
+                setModified(true);
+                delegate.documentChanged();
+                updateStatusBar();
+            }
         });
         errorHighlighter = new ErrorHighlighter(textPane.getHighlighter());
+        syntaxHighlighter = new SyntaxHighlighter(textPane.getStyledDocument());
 
         editorScrollPane = new JScrollPane(textPane);
         add(editorScrollPane);
@@ -207,10 +215,12 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
             logTextArea.setErrors(errors);
             statusBar.setErrorCount(errors.size());
             errorHighlighter.highlightErrors(parseResult.get().getSourceFile(), errors);
+            syntaxHighlighter.highlight(parseResult.get());
         } else {
             logTextArea.setErrors(Collections.emptyList());
             statusBar.setErrorCount(0);
             errorHighlighter.removeAllHighlights();
+            syntaxHighlighter.removeAllHighlights();
         }
         updateStatusBar();
     }

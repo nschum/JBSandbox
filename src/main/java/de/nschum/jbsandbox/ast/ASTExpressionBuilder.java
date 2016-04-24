@@ -5,11 +5,11 @@ import de.nschum.jbsandbox.grammar.JBGrammar;
 import de.nschum.jbsandbox.parser.ParserTree;
 import de.nschum.jbsandbox.source.SourceRange;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static de.nschum.jbsandbox.grammar.JBGrammar.*;
+import static java.util.Arrays.asList;
 
 /**
  * Helper for ASTBuilder that parses expressions
@@ -53,7 +53,8 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
 
         ParserTree expressionTree = parserTree.getChild(1);
 
-        return new ParenthesizedExpression(parseExpression(expressionTree, scope), parserTree.getLocation());
+        return new ParenthesizedExpression(parseExpression(expressionTree, scope),
+                parseTerminals(parserTree), parserTree.getLocation());
     }
 
     private Expression parseRuleReference(ParserTree parserTree, Scope scope) {
@@ -68,7 +69,7 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
         }
 
         return new Reference(referencedVariable.orElse(new Variable(Type.UNDETERMINED, variableName)),
-                parserTree.getLocation());
+                parseTerminals(parserTree), parserTree.getLocation());
     }
 
     private Expression parseRuleRange(ParserTree parserTree, Scope scope) {
@@ -86,7 +87,8 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
                     parserTree.getLocation()));
         }
 
-        return new IntRangeExpression(lowerBound, upperBound, parserTree.getLocation());
+        return new IntRangeExpression(lowerBound, upperBound,
+                parseTerminals(parserTree), parserTree.getLocation());
     }
 
     private Expression parseRuleNumber(ParserTree parserTree) {
@@ -100,9 +102,14 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
     private Expression parseRuleMap(ParserTree parserTree, Scope scope) {
         assertRule(parserTree, KEYWORD_MAP, PAREN_OPEN, EXPR, COMMA, IDENTIFIER, ARROW, EXPR, PAREN_CLOSE, EXPR_CONTINUED);
 
+        ParserTree mapTree = parserTree.getChild(0);
+        ParserTree parenOpenTree = parserTree.getChild(1);
         ParserTree inputTree = parserTree.getChild(2);
+        ParserTree commaTree = parserTree.getChild(3);
         ParserTree parameterTree = parserTree.getChild(4);
+        ParserTree arrowTree = parserTree.getChild(5);
         ParserTree expressionTree = parserTree.getChild(6);
+        ParserTree parenCloseTree = parserTree.getChild(7);
 
         Expression input = parseExpression(inputTree, scope);
         if (!input.getType().isSequence()) {
@@ -114,18 +121,27 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
 
         Expression lambda = parseExpression(expressionTree, scope.addVariable(parameter));
 
-        final Lambda function = new Lambda(Arrays.asList(parameter), lambda);
-        return new MapExpression(new SequenceType(lambda.getType()), input, function, parserTree.getLocation());
+        Lambda function = new Lambda(asList(parameter), lambda,
+                asList(parseTerminal(parameterTree), parseTerminal(arrowTree)), parserTree.getLocation());
+        return new MapExpression(new SequenceType(lambda.getType()), input, function,
+                asList(parseTerminal(mapTree), parseTerminal(parenOpenTree), parseTerminal(commaTree),
+                        parseTerminal(parenCloseTree)), parserTree.getLocation());
     }
 
     private Expression parseRuleReduce(ParserTree parserTree, Scope scope) {
         assertRule(parserTree, KEYWORD_REDUCE, PAREN_OPEN, EXPR, COMMA, EXPR, COMMA, IDENTIFIER, IDENTIFIER, ARROW, EXPR, PAREN_CLOSE, EXPR_CONTINUED);
 
+        ParserTree reduceTree = parserTree.getChild(0);
+        ParserTree parenOpenTree = parserTree.getChild(1);
         ParserTree inputTree = parserTree.getChild(2);
+        ParserTree commaTree1 = parserTree.getChild(3);
         ParserTree initialValueTree = parserTree.getChild(4);
+        ParserTree commaTree2 = parserTree.getChild(5);
         ParserTree parameterTree1 = parserTree.getChild(6);
         ParserTree parameterTree2 = parserTree.getChild(7);
+        ParserTree arrowTree = parserTree.getChild(8);
         ParserTree expressionTree = parserTree.getChild(9);
+        ParserTree parenCloseTree = parserTree.getChild(10);
 
         Expression input = parseExpression(inputTree, scope);
         Expression initialValue = parseExpression(initialValueTree, scope);
@@ -144,8 +160,13 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
                     parserTree.getLocation()));
         }
 
-        final Lambda function = new Lambda(Arrays.asList(parameter1, parameter2), lambda);
-        return new ReduceExpression(type, input, initialValue, function, parserTree.getLocation());
+        Lambda function = new Lambda(asList(parameter1, parameter2), lambda,
+                asList(parseTerminal(parameterTree1), parseTerminal(parameterTree2), parseTerminal(arrowTree)),
+                parserTree.getLocation());
+        return new ReduceExpression(type, input, initialValue, function,
+                asList(parseTerminal(reduceTree), parseTerminal(parenOpenTree), parseTerminal(commaTree1),
+                        parseTerminal(commaTree2), parseTerminal(parenCloseTree)),
+                parserTree.getLocation());
     }
 
     private Expression parseRuleNegate(ParserTree parserTree) {
@@ -188,7 +209,8 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
                     parserTree.getLocation()));
         }
 
-        OperationExpression result = new OperationExpression(type, leftHandExpression, rightHandExpression, operation);
+        OperationExpression result = new OperationExpression(type, leftHandExpression, rightHandExpression, operation,
+                asList(parseTerminal(operationTree.getChild(0))));
         return new OperatorPrecedenceSyntaxTreeRewriter().reorderOperations(result);
     }
 
