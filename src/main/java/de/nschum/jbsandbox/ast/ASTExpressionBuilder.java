@@ -114,7 +114,7 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
 
         Expression lambda = parseExpression(expressionTree, scope.addVariable(parameter));
 
-        final Lambda function = new Lambda(Arrays.asList(parameter), lambda);
+        final Lambda function = new Lambda(Arrays.asList(parameter), lambda, parserTree.getLocation());
         return new MapExpression(new SequenceType(lambda.getType()), input, function, parserTree.getLocation());
     }
 
@@ -144,7 +144,7 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
                     parserTree.getLocation()));
         }
 
-        final Lambda function = new Lambda(Arrays.asList(parameter1, parameter2), lambda);
+        final Lambda function = new Lambda(Arrays.asList(parameter1, parameter2), lambda, parserTree.getLocation());
         return new ReduceExpression(type, input, initialValue, function, parserTree.getLocation());
     }
 

@@ -1,13 +1,16 @@
 package de.nschum.jbsandbox.ast;
 
+import de.nschum.jbsandbox.source.SourceRange;
+
 import java.util.List;
 
-public class Lambda {
+public class Lambda extends SyntaxTree {
 
     private List<Variable> parameters;
     private Expression expression;
 
-    public Lambda(List<Variable> parameters, Expression expression) {
+    public Lambda(List<Variable> parameters, Expression expression, SourceRange location) {
+        super(location);
         this.parameters = parameters;
         this.expression = expression;
     }
