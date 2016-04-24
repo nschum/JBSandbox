@@ -51,4 +51,15 @@ public class SourceRange {
     public String toString() {
         return start + "-" + end;
     }
+
+    /**
+     * Pretty-print location and convert indexing to start with 1
+     */
+    public String toHumanReadableString() {
+        if (isSinglePoint()) {
+            return getStart().toHumanReadableString();
+        } else {
+            return getStart().toHumanReadableString() + "-" + getEnd().toHumanReadableString();
+        }
+    }
 }
