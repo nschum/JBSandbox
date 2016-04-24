@@ -1,0 +1,5 @@
+#!/bin/bash -eu
+# JBSandbox UI and open sample script
+
+mvn install
+java -cp target/JBSandbox-1.0-SNAPSHOT.jar de.nschum.jbsandbox.JBSandbox samples/pi.jb &
