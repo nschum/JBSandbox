@@ -29,7 +29,7 @@ public class ErrorHighlighter {
     }
 
     public void highlightErrors(SourceFile sourceFile, List<ParseError> errors) {
-        highlighter.removeAllHighlights();
+        removeAllHighlights();
         for (ParseError error : errors) {
             SourceRange location = error.getLocation();
             int start = sourceFile.offsetForLocation(location.getStart());
@@ -37,6 +37,11 @@ public class ErrorHighlighter {
             highlightRange(start, end);
         }
     }
+
+    public void removeAllHighlights() {
+        highlighter.removeAllHighlights();
+    }
+
 
     private void highlightRange(int start, int end) {
         try {

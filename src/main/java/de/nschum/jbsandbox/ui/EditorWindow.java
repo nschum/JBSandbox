@@ -12,6 +12,7 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -198,13 +199,17 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
         selectedError = Optional.empty();
         menu.setErrorNavigationEnabled(parseResult.isPresent() && !parseResult.get().getErrors().isEmpty());
 
-        parseResult.ifPresent(pr -> {
-            List<ParseError> errors = pr.getErrors();
+        if (parseResult.isPresent()) {
+            List<ParseError> errors = parseResult.get().getErrors();
             logTextArea.setErrors(errors);
             statusBar.setErrorCount(errors.size());
-            errorHighlighter.highlightErrors(pr.getSourceFile(), errors);
-            updateStatusBar();
-        });
+            errorHighlighter.highlightErrors(parseResult.get().getSourceFile(), errors);
+        } else {
+            logTextArea.setErrors(Collections.emptyList());
+            statusBar.setErrorCount(0);
+            errorHighlighter.removeAllHighlights();
+        }
+        updateStatusBar();
     }
 
     String getText() {
