@@ -12,9 +12,11 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.Optional;
 
+/**
+ * The main editor for a single file
+ */
 public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHandler {
 
     private static final int DIVIDER_HEIGHT_MIN = 75;
@@ -27,24 +29,19 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
     private JScrollPane logScrollPane;
     private LogTextArea logTextArea = new LogTextArea();
 
+    private Delegate delegate;
     private Optional<File> file = Optional.empty();
     private Optional<ParseResult> parseResult = Optional.empty();
     private EditorWindowMenuBar menu;
     private UndoManager undoManager = new UndoManager();
-    private BackgroundParser backgroundParser = new BackgroundParser();
     private ErrorHighlighter errorHighlighter;
 
     private boolean logVisible = false;
     private int lastDividerHeight = DIVIDER_HEIGHT_DEFAULT;
 
-    public static EditorWindow showNewEditorWindow(Optional<File> file) {
-        EditorWindow editor = new EditorWindow(file);
-        editor.setSize(800, 600);
-        editor.setVisible(true);
-        return editor;
-    }
-
-    private EditorWindow(Optional<File> file) {
+    EditorWindow(Optional<File> file, Delegate delegate) {
+        assert delegate != null;
+        this.delegate = delegate;
         setModified(false);
 
         menu = new EditorWindowMenuBar(this);
@@ -70,8 +67,7 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
             undoManager.addEdit(e.getEdit());
             updateUndo();
             setModified(true);
-            restartParse();
-            setParseResult(Optional.empty());
+            delegate.documentChanged();
             updateStatusBar();
         });
         errorHighlighter = new ErrorHighlighter(textPane.getHighlighter());
@@ -106,11 +102,6 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
         if (!"true".equals(System.getProperty("apple.laf.useScreenMenuBar"))) {
             setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         }
-
-        backgroundParser.addResultListener(parseResult -> {
-            setParseResult(Optional.of(parseResult));
-        });
-        restartParse();
     }
 
     private void updateUndo() {
@@ -157,7 +148,7 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
         getRootPane().putClientProperty("Window.documentModifieduu", modified);
     }
 
-    private String getFileName() {
+    String getFileName() {
         return file.map(File::getName).orElse("Untitled");
     }
 
@@ -181,10 +172,6 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
 
         revalidate();
         textPane.requestFocusInWindow();
-    }
-
-    private void restartParse() {
-        backgroundParser.parse(new SourceFile(getFileName(), new StringReader(textPane.getText())));
     }
 
     private void updateStatusBar() {
@@ -220,18 +207,22 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
         });
     }
 
+    String getText() {
+        return textPane.getText();
+    }
+
     // MenuHandler
 
     @Override
     public void menuItemNewSelected(ActionEvent e) {
-        showNewEditorWindow(Optional.empty());
+        delegate.showNewWindow(Optional.empty());
     }
 
     @Override
     public void menuItemOpenSelected(ActionEvent e) {
         Optional<File> file = askForFileName("Open", FileDialog.LOAD);
         if (file.isPresent()) {
-            showNewEditorWindow(file);
+            delegate.showNewWindow(file);
         }
     }
 
@@ -249,14 +240,14 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
     public void menuItemUndoSelected(ActionEvent e) {
         undoManager.undo();
         updateUndo();
-        restartParse();
+        delegate.documentChanged();
     }
 
     @Override
     public void menuItemRedoSelected(ActionEvent e) {
         undoManager.redo();
         updateUndo();
-        restartParse();
+        delegate.documentChanged();
     }
 
     @Override
@@ -282,5 +273,11 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
     @Override
     public void menuItemErrorsSelected(ActionEvent e) {
         setLogVisible(!logVisible);
+    }
+
+    interface Delegate {
+        default void documentChanged() {
+        }
+        void showNewWindow(Optional<File> file);
     }
 }
