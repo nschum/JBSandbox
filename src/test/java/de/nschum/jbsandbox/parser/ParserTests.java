@@ -1,10 +1,10 @@
 package de.nschum.jbsandbox.parser;
 
-import de.nschum.jbsandbox.source.SourceRange;
 import de.nschum.jbsandbox.grammar.Grammar;
 import de.nschum.jbsandbox.grammar.GrammarRule;
 import de.nschum.jbsandbox.grammar.GrammarToken;
 import de.nschum.jbsandbox.scanner.ScannerToken;
+import de.nschum.jbsandbox.source.SourceRange;
 import org.hamcrest.Matcher;
 import org.junit.Test;
 
@@ -70,7 +70,7 @@ public class ParserTests {
         return IntStream.range(0, grammarTokens.length)
                 .mapToObj(i -> {
                     final GrammarToken token = grammarTokens[i];
-                    SourceRange location = new SourceRange(0, i, 0, i + 1);
+                    SourceRange location = new SourceRange(0, i * 10, 0, i * 10 + 1);
                     return new ScannerToken(token, token.toString(), location);
                 })
                 .collect(toList());
@@ -92,7 +92,7 @@ public class ParserTests {
         assertThat(parserTree, parserTreeWithRule(rule));
         assertThat(parserTree, parserTreeWithChildren(
                 parserTreeWithToken(a, 0, 1),
-                parserTreeWithToken(b, 1, 2)
+                parserTreeWithToken(b, 10, 11)
         ));
     }
 
@@ -112,10 +112,10 @@ public class ParserTests {
         assertThat(parserTree, parserTreeWithChildren(
                 parserTreeWithToken(a, 0, 1),
                 allOf(
-                        parserTreeWithToken(B, 1, 2),
+                        parserTreeWithToken(B, 10, 11),
                         parserTreeWithRule(rule2),
-                        parserTreeWithChildren(parserTreeWithToken(b, 1, 2))),
-                parserTreeWithToken(c, 2, 3)
+                        parserTreeWithChildren(parserTreeWithToken(b, 10, 11))),
+                parserTreeWithToken(c, 20, 21)
         ));
     }
 
@@ -138,7 +138,7 @@ public class ParserTests {
                         parserTreeWithToken(B, 1, 1),
                         parserTreeWithRule(rule2),
                         parserTreeWithChildren(parserTreeWithToken(EPSILON, 1, 1))),
-                parserTreeWithToken(c, 1, 2)
+                parserTreeWithToken(c, 10, 11)
         ));
     }
 
@@ -175,7 +175,7 @@ public class ParserTests {
             parser.parse(mockScannerTokens(a, b));
         } catch (UnexpectedTokenException e) {
             assertThat(e.getMessage(), equalTo("No rule for parsing b"));
-            assertThat(e.getLocation(), equalTo(new SourceRange(0, 1, 0, 2)));
+            assertThat(e.getLocation(), equalTo(new SourceRange(0, 10, 0, 11)));
             throw e;
         }
     }

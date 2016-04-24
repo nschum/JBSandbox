@@ -37,6 +37,7 @@ public class Parser {
 
         Iterator<ScannerToken> unreadTokens = iterateWithEOF(tokens);
         ScannerToken nextToken = unreadTokens.next();
+        SourceLocation previousLocation = new SourceLocation(0, 0);
 
         while (stack.size() > 0 && !stack.peek().getToken().equals(EOF)) {
             if (stack.peek().getToken().equals(EPSILON)) {
@@ -44,13 +45,13 @@ public class Parser {
                 ParserTree output = stack.pop();
                 output.setContent(Optional.of(""));
                 // has empty length
-                SourceLocation location = nextToken.getLocation().getStart();
-                output.setLocation(new SourceRange(location, location));
+                output.setLocation(new SourceRange(previousLocation, previousLocation));
             } else if (stack.peek().getToken().equals(nextToken.getGrammarToken())) {
                 // process terminal and remove it from input
                 ParserTree output = stack.pop();
                 output.setContent(Optional.of(nextToken.getContent()));
                 output.setLocation(nextToken.getLocation());
+                previousLocation = nextToken.getLocation().getEnd();
                 nextToken = unreadTokens.next();
             } else {
                 // apply rule and rewrite stack
