@@ -30,4 +30,46 @@ public class SourceFileTests {
 
         assertThat(sourceFile.offsetForLocation(new SourceLocation(2, 1)), equalTo(9));
     }
+
+    @Test
+    public void shouldReturnIndexAfterLastLine() {
+        SourceFile sourceFile = new SourceFile("-", new StringReader("foo\n"));
+
+        assertThat(sourceFile.offsetForLocation(new SourceLocation(1, 0)), equalTo(4));
+    }
+
+    @Test
+    public void shouldReturnOffsetAsColumnInFirstLine() {
+        SourceFile sourceFile = new SourceFile("-", new StringReader("foo"));
+
+        assertThat(sourceFile.locationForOffset(2), equalTo(new SourceLocation(0, 2)));
+    }
+
+    @Test
+    public void shouldReturnOffsetMinusPreviousLines() {
+        SourceFile sourceFile = new SourceFile("-", new StringReader("foo\nbar\nbaz"));
+
+        assertThat(sourceFile.locationForOffset(9), equalTo(new SourceLocation(2, 1)));
+    }
+
+    @Test
+    public void shouldReturnPreceedingLineOnNewline() {
+        SourceFile sourceFile = new SourceFile("-", new StringReader("foo\nbar"));
+
+        assertThat(sourceFile.locationForOffset(3), equalTo(new SourceLocation(0, 3)));
+    }
+
+    @Test
+    public void shouldReturnFollowingLineOnCharacterAfterNewline() {
+        SourceFile sourceFile = new SourceFile("-", new StringReader("foo\nbar"));
+
+        assertThat(sourceFile.locationForOffset(4), equalTo(new SourceLocation(1, 0)));
+    }
+
+    @Test
+    public void shouldConvertIndexAfterLastLine() {
+        SourceFile sourceFile = new SourceFile("-", new StringReader("foo\n"));
+
+        assertThat(sourceFile.locationForOffset(4), equalTo(new SourceLocation(1, 0)));
+    }
 }

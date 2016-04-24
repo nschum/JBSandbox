@@ -40,8 +40,25 @@ public class SourceFile {
     public int offsetForLocation(SourceLocation location) {
         int offset = 0;
         for (int i = 0; i < location.getLine(); i++) {
-            offset += lines.get(i).length() + "\n".length();
+            offset += getLineLength(i);
         }
         return offset + location.getColumn();
+    }
+
+    /**
+     * Returns a source location for a character offset
+     */
+    public SourceLocation locationForOffset(int offset) {
+        int line = 0;
+        int remaining = offset;
+        while (line < lines.size() && remaining >= getLineLength(line)) {
+            remaining -= getLineLength(line);
+            line++;
+        }
+        return new SourceLocation(line, remaining);
+    }
+
+    private int getLineLength(int i) {
+        return lines.get(i).length() + "\n".length();
     }
 }

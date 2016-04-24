@@ -11,12 +11,19 @@ import java.awt.event.ActionListener;
 public class EditorWindowStatusBar extends JPanel {
 
     private final StatusBarButton status;
+    private final StatusBarButton location;
     private final StatusBarButton error;
 
     public EditorWindowStatusBar() {
         setPreferredSize(new Dimension(0, 22));
         setBorder(new EmptyBorder(0, 8, 0, 8));
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+
+        location = new StatusBarButton("");
+        location.setHorizontalAlignment(SwingConstants.RIGHT);
+        add(location);
+
+        add(Box.createHorizontalStrut(10));
 
         status = new StatusBarButton("");
         status.setHorizontalAlignment(SwingConstants.LEFT);
@@ -58,5 +65,9 @@ public class EditorWindowStatusBar extends JPanel {
 
     public void setText(String text) {
         status.setText(text);
+    }
+
+    public void setLocationText(String text) {
+        location.setText(text);
     }
 }

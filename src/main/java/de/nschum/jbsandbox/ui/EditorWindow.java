@@ -176,6 +176,9 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
     private void updateStatusBar() {
         int caretPosition = textPane.getCaretPosition();
         statusBar.setText(getErrorForPosition(caretPosition).orElse(""));
+        parseResult.map(pr -> pr.getSourceFile().locationForOffset(caretPosition)
+                .toHumanReadableString())
+                .ifPresent(statusBar::setLocationText);
     }
 
     private Optional<String> getErrorForPosition(int position) {
