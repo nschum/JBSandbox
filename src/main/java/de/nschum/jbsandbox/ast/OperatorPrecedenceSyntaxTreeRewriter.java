@@ -7,7 +7,7 @@ class OperatorPrecedenceSyntaxTreeRewriter {
 
     /**
      * Modifies the ParseTree to account for operator precedence
-     * <p>
+     * <p/>
      * This looks at the tree's right hand side and while the right hand side as also an operation and has lower or
      * equal precedence, it moves the ParseTree down the tree to the right position.
      */
@@ -39,14 +39,16 @@ class OperatorPrecedenceSyntaxTreeRewriter {
                                 newExpressionType,
                                 expression.getLeftHandSide(),
                                 rightHandSide.getLeftHandSide(),
-                                expression.getOperation()));
+                                expression.getOperation(),
+                                expression.getTerminals()));
 
                 Type newRightHandSideType = promoteTypes(rightHandSide.getType(), expression.getType());
                 OperationExpression newRightHandSide = new OperationExpression(
                         newRightHandSideType,
                         newExpression,
                         rightHandSide.getRightHandSide(),
-                        rightHandSide.getOperation());
+                        rightHandSide.getOperation(),
+                        rightHandSide.getTerminals());
 
                 return newRightHandSide;
             }

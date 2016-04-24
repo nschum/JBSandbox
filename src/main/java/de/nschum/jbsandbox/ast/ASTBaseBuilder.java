@@ -7,6 +7,8 @@ import de.nschum.jbsandbox.parser.ParserTree;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.stream.Collectors.toList;
+
 /**
  * Base class for ASTBuilder and its delegates
  */
@@ -43,5 +45,19 @@ public abstract class ASTBaseBuilder {
 
     public List<ASTError> getErrors() {
         return errors;
+    }
+
+    /**
+     * Parse all terminals on the right hand side and create SyntaxTree nodes for them
+     */
+    protected List<Terminal> parseTerminals(ParserTree parserTree) {
+        return parserTree.getChildren().stream()
+                .filter(pt -> pt.getToken().isTerminal())
+                .map(this::parseTerminal)
+                .collect(toList());
+    }
+
+    Terminal parseTerminal(ParserTree parserTree) {
+        return new Terminal(parserTree.getToken(), parserTree.getLocation());
     }
 }

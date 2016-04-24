@@ -4,6 +4,7 @@ import org.junit.After;
 import org.junit.Test;
 
 import static de.nschum.jbsandbox.Matchers.contains;
+import static de.nschum.jbsandbox.grammar.JBGrammar.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
@@ -29,6 +30,9 @@ public class ASTBuilderStatementTests extends ASTBuilderBaseTests {
 
         assertThat(statement, instanceOf(PrintStatement.class));
         assertThat(statement, hasProperty("string", equalTo("foo")));
+        assertThat(statement, hasProperty("terminals", contains(
+                terminal(KEYWORD_PRINT, 0, 5),
+                terminal(STRING, 6, 11))));
     }
 
     @Test
@@ -44,6 +48,10 @@ public class ASTBuilderStatementTests extends ASTBuilderBaseTests {
                 instanceOf(IntLiteral.class),
                 hasProperty("type", equalTo(Type.INT)),
                 hasProperty("content", equalTo(42)))));
+        assertThat(statement, hasProperty("terminals", contains(
+                terminal(KEYWORD_VAR, 0, 3),
+                terminal(IDENTIFIER, 4, 7),
+                terminal(EQUALS, 8, 9))));
     }
 
     @Test
@@ -55,6 +63,7 @@ public class ASTBuilderStatementTests extends ASTBuilderBaseTests {
                 instanceOf(IntLiteral.class),
                 hasProperty("type", equalTo(Type.INT)),
                 hasProperty("content", equalTo(42)))));
+        assertThat(statement, hasProperty("terminals", contains(terminal(KEYWORD_OUT, 0, 3))));
     }
 
     @Test

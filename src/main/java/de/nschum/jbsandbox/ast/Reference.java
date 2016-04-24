@@ -2,12 +2,14 @@ package de.nschum.jbsandbox.ast;
 
 import de.nschum.jbsandbox.source.SourceRange;
 
+import java.util.List;
+
 public class Reference extends Expression {
 
     private Variable variable;
 
-    public Reference(Variable variable, SourceRange location) {
-        super(variable.getType(), location);
+    public Reference(Variable variable, List<Terminal> terminals, SourceRange location) {
+        super(variable.getType(), terminals, location);
         this.variable = variable;
     }
 

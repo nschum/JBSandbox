@@ -2,17 +2,19 @@ package de.nschum.jbsandbox.ast;
 
 import de.nschum.jbsandbox.source.SourceRange;
 
+import java.util.List;
+
 /**
  * Single expression node
- * <p>
+ * <p/>
  * This is used to stop OperatorPrecedenceSyntoxTreeRewriter from rewriting operations when it reaches parentheses.
  */
 public class ParenthesizedExpression extends Expression {
 
     private Expression expression;
 
-    public ParenthesizedExpression(Expression expression, SourceRange location) {
-        super(expression.getType(), location);
+    public ParenthesizedExpression(Expression expression, List<Terminal> terminals, SourceRange location) {
+        super(expression.getType(), terminals, location);
         this.expression = expression;
     }
 

@@ -9,8 +9,8 @@ public class Lambda extends SyntaxTree {
     private List<Variable> parameters;
     private Expression expression;
 
-    public Lambda(List<Variable> parameters, Expression expression, SourceRange location) {
-        super(location);
+    public Lambda(List<Variable> parameters, Expression expression, List<Terminal> terminals, SourceRange location) {
+        super(terminals, location);
         this.parameters = parameters;
         this.expression = expression;
     }

@@ -2,6 +2,8 @@ package de.nschum.jbsandbox.ast;
 
 import de.nschum.jbsandbox.source.SourceRange;
 
+import java.util.List;
+
 public class ReduceExpression extends Expression {
 
     private Expression input;
@@ -9,8 +11,8 @@ public class ReduceExpression extends Expression {
     private Lambda function;
 
     public ReduceExpression(Type type, Expression input, Expression initialValue, Lambda function,
-                            SourceRange location) {
-        super(type, location);
+                            List<Terminal> terminals, SourceRange location) {
+        super(type, terminals, location);
         this.input = input;
         this.initialValue = initialValue;
         this.function = function;
