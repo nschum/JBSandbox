@@ -4,6 +4,7 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.util.Optional;
 
 /**
  * The status bar for the main editor window
@@ -12,7 +13,10 @@ public class EditorWindowStatusBar extends JPanel {
 
     private final StatusBarButton status;
     private final StatusBarButton location;
-    private final StatusBarButton error;
+    private final StatusBarButton log;
+
+    private Color logButtonColor;
+    private boolean logSelected = false;
 
     public EditorWindowStatusBar() {
         setPreferredSize(new Dimension(0, 22));
@@ -31,32 +35,62 @@ public class EditorWindowStatusBar extends JPanel {
 
         add(Box.createGlue());
 
-        error = new StatusBarButton("");
-        error.setClickable(true);
-        error.setHorizontalAlignment(SwingConstants.RIGHT);
-        setErrorSelected(false);
-        add(error);
+        log = new StatusBarButton("");
+        log.setClickable(true);
+        log.setHorizontalAlignment(SwingConstants.RIGHT);
+        setLogSelected(false);
+        add(log);
     }
 
     public void addErrorActionListener(ActionListener actionListener) {
-        error.addActionListener(actionListener);
+        log.addActionListener(actionListener);
     }
 
-    public void setErrorCount(int count) {
-        switch (count) {
+    public void setParsing() {
+        log.setText("parsing…");
+        logButtonColor = new Color(0, 0, 160);
+    }
+
+    public void setLogButtonOutput(int errorCount, Optional<String> output) {
+        switch (errorCount) {
             case 0:
-                error.setText("");
+                log.setText("running…");
                 break;
             case 1:
-                error.setText("1 error");
+                log.setText("1 error");
                 break;
             default:
-                error.setText(count + " errors");
+                log.setText(errorCount + " errors");
         }
+
+        if (errorCount == 0) {
+            output.ifPresent(o -> {
+                int lineCount = o.split("\n").length;
+                if (o.length() == 0) {
+                    log.setText("no output");
+                } else if (lineCount == 1) {
+                    log.setText("1 line of output");
+                } else {
+                    log.setText(lineCount + " lines of output");
+                }
+            });
+        }
+
+        if (errorCount > 0) {
+            logButtonColor = new Color(160, 0, 0);
+        } else {
+            logButtonColor = new Color(0, 160, 0);
+        }
+        updateLogButtonColor();
     }
 
-    public void setErrorSelected(boolean errorSelected) {
-        error.setForeground(errorSelected ? StatusBarButton.COLOR : new Color(160, 0, 0));
+    public void setLogSelected(boolean logSelected) {
+        this.logSelected = logSelected;
+        updateLogButtonColor();
+    }
+
+    private void updateLogButtonColor() {
+        log.setForeground(logSelected ? StatusBarButton.COLOR : logButtonColor);
     }
 
     public String getText() {

@@ -36,6 +36,7 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
     private Delegate delegate;
     private Optional<File> file = Optional.empty();
     private Optional<ParseResult> parseResult = Optional.empty();
+    private Optional<InterpreterResult> interpreterResult = Optional.empty();
     private EditorWindowMenuBar menu;
     private UndoManager undoManager = new UndoManager();
     private ErrorHighlighter errorHighlighter;
@@ -161,7 +162,7 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
 
     private void setLogVisible(boolean logVisible) {
         this.logVisible = logVisible;
-        statusBar.setErrorSelected(logVisible);
+        statusBar.setLogSelected(logVisible);
         menu.setErrorsVisible(logVisible);
 
         if (logVisible) {
@@ -213,14 +214,30 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
         if (parseResult.isPresent()) {
             List<EditorError> errors = parseResult.get().getErrors();
             logTextArea.setErrors(errors);
-            statusBar.setErrorCount(errors.size());
+            statusBar.setLogButtonOutput(errors.size(), Optional.empty());
             errorHighlighter.highlightErrors(parseResult.get().getSourceFile(), errors);
             syntaxHighlighter.highlight(parseResult.get());
         } else {
             logTextArea.setErrors(Collections.emptyList());
-            statusBar.setErrorCount(0);
+            statusBar.setParsing();
             errorHighlighter.removeAllHighlights();
             syntaxHighlighter.removeAllHighlights();
+        }
+        updateStatusBar();
+    }
+
+    public void setInterpreterResult(Optional<InterpreterResult> interpreterResult) {
+        this.interpreterResult = interpreterResult;
+
+        if (interpreterResult.isPresent()) {
+            String output = interpreterResult.get().getOutput();
+            logTextArea.setText(output);
+
+            List<EditorError> errors = interpreterResult.get().getErrors();
+            statusBar.setLogButtonOutput(errors.size(), Optional.of(output));
+            errorHighlighter.highlightErrors(interpreterResult.get().getSourceFile(), errors);
+        } else {
+            logTextArea.setText("");
         }
         updateStatusBar();
     }

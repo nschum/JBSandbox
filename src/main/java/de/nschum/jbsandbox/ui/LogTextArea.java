@@ -53,6 +53,12 @@ public class LogTextArea extends JTextPane {
         selectionListeners.add(listener);
     }
 
+    @Override
+    public void setText(String t) {
+        super.setText(t);
+        getStyledDocument().setCharacterAttributes(0, getStyledDocument().getLength(), plainStyle, true);
+    }
+
     /**
      * Set the list of displayed errors
      */

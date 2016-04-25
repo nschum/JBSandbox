@@ -14,6 +14,7 @@ public class EditorWindowController implements EditorWindow.Delegate {
     private EditorWindow window;
 
     private BackgroundParser backgroundParser = new BackgroundParser();
+    private BackgroundInterpreter backgroundInterpreter = new BackgroundInterpreter();
 
     public static EditorWindowController showNewEditorWindow(Optional<File> file) {
         EditorWindowController editor = new EditorWindowController(file);
@@ -27,13 +28,25 @@ public class EditorWindowController implements EditorWindow.Delegate {
 
         backgroundParser.addResultListener(parseResult -> {
             window.setParseResult(Optional.of(parseResult));
+            if (parseResult.getErrors().isEmpty()) {
+                startExecution(parseResult);
+            }
+        });
+        backgroundInterpreter.addResultListener(interpreterResult -> {
+            window.setInterpreterResult(Optional.of(interpreterResult));
         });
         restartParse();
     }
 
     private void restartParse() {
         window.setParseResult(Optional.empty());
+        window.setInterpreterResult(Optional.empty());
         backgroundParser.parse(new SourceFile(window.getFileName(), new StringReader(window.getText())));
+    }
+
+    private void startExecution(ParseResult parseResult) {
+        window.setInterpreterResult(Optional.empty());
+        backgroundInterpreter.run(parseResult.getSourceFile(), parseResult.getSyntaxTree().get());
     }
 
     // EditorWindow.Delegate
