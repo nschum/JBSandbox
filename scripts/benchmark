@@ -5,4 +5,4 @@ mvn install
 echo
 echo "Running samples/pi.jb…"
 echo
-time java -cp target/JBSandbox-1.0-SNAPSHOT.jar de.nschum.jbsandbox.JBSandboxRunner samples/pi.jb
+time java -cp target/JBSandbox-1.0-SNAPSHOT.jar de.nschum.jbsandbox.JBSandboxRunner samples/benchmark.jb
