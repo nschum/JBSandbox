@@ -5,6 +5,7 @@ import de.nschum.jbsandbox.ast.*;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
+import java.util.concurrent.CompletionException;
 
 /**
  * Executes a program defined by its abstract syntax tree
@@ -30,11 +31,19 @@ public class Interpreter {
 
     public void execute(Program program)
             throws IOException, InterpreterRuntimeException, InterpreterCancelledException {
-        State state = new State();
-        for (Statement statement : program.getStatements()) {
-            execute(statement, state);
+        try {
+            State state = new State();
+            for (Statement statement : program.getStatements()) {
+                execute(statement, state);
+            }
+            outputWriter.flush();
+        } catch (CompletionException e) {
+            if (e.getCause() instanceof RuntimeException) {
+                throw (RuntimeException) e.getCause();
+            } else {
+                throw e;
+            }
         }
-        outputWriter.flush();
     }
 
     private void execute(Statement statement, State state) throws IOException {
@@ -115,7 +124,7 @@ public class Interpreter {
         Type inputType = expression.getInput().getType();
         Type parameterType = expression.getFunction().getParameters().get(0).getType();
 
-        return Value.of(((Sequence) promote(input, inputType, parameterType.asSequence()).get()).map(value -> {
+        return Value.of(((Sequence) promote(input, inputType, parameterType.asSequence()).get()).parallelMap(value -> {
             checkIfCancelled();
             return applyFunction(expression.getFunction(), state, value);
         }));
@@ -128,12 +137,14 @@ public class Interpreter {
         Type inputType = expression.getInput().getType();
         Type parameterType = expression.getFunction().getParameters().get(0).getType();
 
-        Value reducedValue = promote(initialValue, expression.getInitialValue().getType(), parameterType);
-        for (Value value : (Sequence) promote(input, inputType, parameterType.asSequence()).get()) {
+        Value promotedInitialValue = promote(initialValue, expression.getInitialValue().getType(), parameterType);
+        Sequence promotedInput = (Sequence) promote(input, inputType, parameterType.asSequence()).get();
+        Lambda function = expression.getFunction();
+
+        return promotedInput.reduce(promotedInitialValue, (v1, v2) -> {
             checkIfCancelled();
-            reducedValue = applyFunction(expression.getFunction(), state, reducedValue, value);
-        }
-        return reducedValue;
+            return applyFunction(function, state, v1, v2);
+        });
     }
 
     private Value evaluateOperation(OperationExpression expression, State state) {

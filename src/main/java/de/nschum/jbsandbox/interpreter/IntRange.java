@@ -10,8 +10,8 @@ import java.util.stream.Stream;
  */
 public class IntRange implements Sequence {
 
-    private int lowerBound;
-    private int upperBound;
+    private final int lowerBound;
+    private final int upperBound;
 
     public IntRange(int lowerBound, int upperBound) {
         assert lowerBound <= upperBound;

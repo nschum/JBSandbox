@@ -7,8 +7,8 @@ import java.util.function.Consumer;
 
 public class MapExpression extends Expression {
 
-    private Expression input;
-    private Lambda function;
+    private final Expression input;
+    private final Lambda function;
 
     public MapExpression(Type type, Expression input, Lambda function, List<Terminal> terminals, SourceRange location) {
         super(type, terminals, location);
