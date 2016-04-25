@@ -9,31 +9,31 @@ import de.nschum.jbsandbox.source.SourceRange;
 /**
  * Scanning or parsing error created by BackgroundParser
  */
-public class ParseError {
+public class EditorError {
 
     private String message;
     private SourceRange location;
 
-    public ParseError(String message, SourceRange location) {
+    public EditorError(String message, SourceRange location) {
         assert message != null;
         assert location != null;
         this.message = message;
         this.location = location;
     }
 
-    public ParseError(ASTError astError) {
+    public EditorError(ASTError astError) {
         this(astError.getMessage(), astError.getLocation());
     }
 
-    public ParseError(UnexpectedTokenException e) {
+    public EditorError(UnexpectedTokenException e) {
         this(e.getMessage(), e.getLocation());
     }
 
-    public ParseError(IllegalTokenException e) {
+    public EditorError(IllegalTokenException e) {
         this(e.getMessage(), new SourceRange(e.getLocation(), e.getLocation()));
     }
 
-    public ParseError(MissingTokenException e) {
+    public EditorError(MissingTokenException e) {
         this(e.getMessage(), e.getLocation());
     }
 

@@ -43,7 +43,7 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
 
     private boolean logVisible = false;
     private int lastDividerHeight = DIVIDER_HEIGHT_DEFAULT;
-    private Optional<ParseError> selectedError;
+    private Optional<EditorError> selectedError;
 
     EditorWindow(Optional<File> file, Delegate delegate) {
         assert delegate != null;
@@ -199,7 +199,7 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
                         int end = sourceFile.offsetForLocation(location.getEnd());
                         return start <= position && position <= end;
                     })
-                    .map(ParseError::getMessage)
+                    .map(EditorError::getMessage)
                     .findFirst();
 
         });
@@ -211,7 +211,7 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
         menu.setErrorNavigationEnabled(parseResult.isPresent() && !parseResult.get().getErrors().isEmpty());
 
         if (parseResult.isPresent()) {
-            List<ParseError> errors = parseResult.get().getErrors();
+            List<EditorError> errors = parseResult.get().getErrors();
             logTextArea.setErrors(errors);
             statusBar.setErrorCount(errors.size());
             errorHighlighter.highlightErrors(parseResult.get().getSourceFile(), errors);
@@ -229,7 +229,7 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
         return textPane.getText();
     }
 
-    private void selectError(ParseError error) {
+    private void selectError(EditorError error) {
         SourceFile sourceFile = parseResult.get().getSourceFile();
         textPane.setSelectionStart(sourceFile.offsetForLocation(error.getLocation().getStart()));
         textPane.setSelectionEnd(sourceFile.offsetForLocation(error.getLocation().getEnd()));
@@ -302,14 +302,14 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
 
     @Override
     public void menuItemNextErrorSelected(ActionEvent e) {
-        List<ParseError> errors = parseResult.get().getErrors();
+        List<EditorError> errors = parseResult.get().getErrors();
         int selectedIndex = selectedError.map(errors::indexOf).orElse(-1);
         selectError(errors.get(Math.floorMod(selectedIndex + 1, errors.size())));
     }
 
     @Override
     public void menuItemPreviousErrorSelected(ActionEvent e) {
-        List<ParseError> errors = parseResult.get().getErrors();
+        List<EditorError> errors = parseResult.get().getErrors();
         int selectedIndex = selectedError.map(errors::indexOf).orElse(errors.size());
         selectError(errors.get(Math.floorMod(selectedIndex - 1, errors.size())));
     }
