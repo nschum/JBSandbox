@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
@@ -28,6 +29,14 @@ public class InterpreterTests {
             throws IllegalTokenException, UnexpectedTokenException, MissingTokenException, IOException,
             InterpreterRuntimeException {
 
+        Program syntaxTree = parse(input);
+
+        StringWriter output = new StringWriter();
+        new Interpreter(new BufferedWriter(output)).execute(syntaxTree);
+        return output.toString();
+    }
+
+    private Program parse(String input) throws IllegalTokenException, UnexpectedTokenException, MissingTokenException {
         JBGrammar grammar = new JBGrammar();
         Parser parser = new Parser(grammar);
 
@@ -38,10 +47,7 @@ public class InterpreterTests {
         Program syntaxTree = astBuilder.createSyntaxTree(parserTree);
 
         assertThat(astBuilder.getErrors(), empty());
-
-        StringWriter output = new StringWriter();
-        new Interpreter(new BufferedWriter(output)).execute(syntaxTree);
-        return output.toString();
+        return syntaxTree;
     }
 
     // tests
@@ -241,4 +247,23 @@ public class InterpreterTests {
     public void shouldNotAllowReverseRange() throws Exception {
         run("out {5, 0}");
     }
+
+    @Test(expected = InterpreterCancelledException.class)
+    public void shouldSupportCancellation() throws Exception {
+        // given
+        Program syntaxTree = parse("var n = 50000000 var sequence = map({0, n}, i -> (-1)^i)");
+        StringWriter output = new StringWriter();
+        Interpreter interpreter = new Interpreter(new BufferedWriter(output));
+
+        CompletableFuture.runAsync(() -> {
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+            }
+            interpreter.cancel();
+        });
+
+        interpreter.execute(syntaxTree);
+    }
+
 }

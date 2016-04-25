@@ -44,13 +44,13 @@ class BackgroundParser {
                 Program syntaxTree = astBuilder.createSyntaxTree(parserTree);
 
                 return new ParseResult(sourceFile, syntaxTree,
-                        astBuilder.getErrors().stream().map(ParseError::new).collect(toList()));
+                        astBuilder.getErrors().stream().map(EditorError::new).collect(toList()));
             } catch (UnexpectedTokenException e) {
-                return new ParseResult(sourceFile, Arrays.asList(new ParseError(e)));
+                return new ParseResult(sourceFile, Arrays.asList(new EditorError(e)));
             } catch (IllegalTokenException e) {
-                return new ParseResult(sourceFile, Arrays.asList(new ParseError(e)));
+                return new ParseResult(sourceFile, Arrays.asList(new EditorError(e)));
             } catch (MissingTokenException e) {
-                return new ParseResult(sourceFile, Arrays.asList(new ParseError(e)));
+                return new ParseResult(sourceFile, Arrays.asList(new EditorError(e)));
             }
         });
         future.thenAcceptAsync(parseResult -> {

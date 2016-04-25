@@ -28,9 +28,9 @@ public class ErrorHighlighter {
         assert highlighter != null;
     }
 
-    public void highlightErrors(SourceFile sourceFile, List<ParseError> errors) {
+    public void highlightErrors(SourceFile sourceFile, List<EditorError> errors) {
         removeAllHighlights();
-        for (ParseError error : errors) {
+        for (EditorError error : errors) {
             SourceRange location = error.getLocation();
             int start = sourceFile.offsetForLocation(location.getStart());
             int end = location.isSinglePoint() ? start + 1 : sourceFile.offsetForLocation(location.getEnd());

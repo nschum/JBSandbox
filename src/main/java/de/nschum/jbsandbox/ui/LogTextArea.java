@@ -21,7 +21,7 @@ public class LogTextArea extends JTextPane {
     private final Style plainStyle;
     private final Style selectableStyle;
 
-    private List<Consumer<ParseError>> selectionListeners = new ArrayList<>();
+    private List<Consumer<EditorError>> selectionListeners = new ArrayList<>();
 
     public LogTextArea() {
         setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
@@ -39,7 +39,7 @@ public class LogTextArea extends JTextPane {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                getMouseEventAttribute(e, ATTRIBUTE_ERROR, ParseError.class).ifPresent(error -> {
+                getMouseEventAttribute(e, ATTRIBUTE_ERROR, EditorError.class).ifPresent(error -> {
                     selectionListeners.forEach(listener -> listener.accept(error));
                 });
             }
@@ -49,17 +49,23 @@ public class LogTextArea extends JTextPane {
     /**
      * Add observer for the user selecting an error
      */
-    public void addSelectionListener(Consumer<ParseError> listener) {
+    public void addSelectionListener(Consumer<EditorError> listener) {
         selectionListeners.add(listener);
+    }
+
+    @Override
+    public void setText(String t) {
+        super.setText(t);
+        getStyledDocument().setCharacterAttributes(0, getStyledDocument().getLength(), plainStyle, true);
     }
 
     /**
      * Set the list of displayed errors
      */
-    public void setErrors(List<ParseError> errors) {
+    public void setErrors(List<EditorError> errors) {
         setText("");
         try {
-            for (ParseError error : errors) {
+            for (EditorError error : errors) {
                 appendError(error);
             }
         } catch (BadLocationException e) {
@@ -67,7 +73,7 @@ public class LogTextArea extends JTextPane {
         }
     }
 
-    private void appendError(ParseError error) throws BadLocationException {
+    private void appendError(EditorError error) throws BadLocationException {
         append(error.getMessage() + ": ", plainStyle);
 
         SimpleAttributeSet attributes = new SimpleAttributeSet(selectableStyle);

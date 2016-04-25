@@ -36,6 +36,7 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
     private Delegate delegate;
     private Optional<File> file = Optional.empty();
     private Optional<ParseResult> parseResult = Optional.empty();
+    private Optional<InterpreterResult> interpreterResult = Optional.empty();
     private EditorWindowMenuBar menu;
     private UndoManager undoManager = new UndoManager();
     private ErrorHighlighter errorHighlighter;
@@ -43,7 +44,7 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
 
     private boolean logVisible = false;
     private int lastDividerHeight = DIVIDER_HEIGHT_DEFAULT;
-    private Optional<ParseError> selectedError;
+    private Optional<EditorError> selectedError;
 
     EditorWindow(Optional<File> file, Delegate delegate) {
         assert delegate != null;
@@ -161,7 +162,7 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
 
     private void setLogVisible(boolean logVisible) {
         this.logVisible = logVisible;
-        statusBar.setErrorSelected(logVisible);
+        statusBar.setLogSelected(logVisible);
         menu.setErrorsVisible(logVisible);
 
         if (logVisible) {
@@ -199,7 +200,7 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
                         int end = sourceFile.offsetForLocation(location.getEnd());
                         return start <= position && position <= end;
                     })
-                    .map(ParseError::getMessage)
+                    .map(EditorError::getMessage)
                     .findFirst();
 
         });
@@ -211,16 +212,32 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
         menu.setErrorNavigationEnabled(parseResult.isPresent() && !parseResult.get().getErrors().isEmpty());
 
         if (parseResult.isPresent()) {
-            List<ParseError> errors = parseResult.get().getErrors();
+            List<EditorError> errors = parseResult.get().getErrors();
             logTextArea.setErrors(errors);
-            statusBar.setErrorCount(errors.size());
+            statusBar.setLogButtonOutput(errors.size(), Optional.empty());
             errorHighlighter.highlightErrors(parseResult.get().getSourceFile(), errors);
             syntaxHighlighter.highlight(parseResult.get());
         } else {
             logTextArea.setErrors(Collections.emptyList());
-            statusBar.setErrorCount(0);
+            statusBar.setParsing();
             errorHighlighter.removeAllHighlights();
             syntaxHighlighter.removeAllHighlights();
+        }
+        updateStatusBar();
+    }
+
+    public void setInterpreterResult(Optional<InterpreterResult> interpreterResult) {
+        this.interpreterResult = interpreterResult;
+
+        if (interpreterResult.isPresent()) {
+            String output = interpreterResult.get().getOutput();
+            logTextArea.setText(output);
+
+            List<EditorError> errors = interpreterResult.get().getErrors();
+            statusBar.setLogButtonOutput(errors.size(), Optional.of(output));
+            errorHighlighter.highlightErrors(interpreterResult.get().getSourceFile(), errors);
+        } else {
+            logTextArea.setText("");
         }
         updateStatusBar();
     }
@@ -229,7 +246,7 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
         return textPane.getText();
     }
 
-    private void selectError(ParseError error) {
+    private void selectError(EditorError error) {
         SourceFile sourceFile = parseResult.get().getSourceFile();
         textPane.setSelectionStart(sourceFile.offsetForLocation(error.getLocation().getStart()));
         textPane.setSelectionEnd(sourceFile.offsetForLocation(error.getLocation().getEnd()));
@@ -302,14 +319,14 @@ public class EditorWindow extends JFrame implements EditorWindowMenuBar.MenuHand
 
     @Override
     public void menuItemNextErrorSelected(ActionEvent e) {
-        List<ParseError> errors = parseResult.get().getErrors();
+        List<EditorError> errors = parseResult.get().getErrors();
         int selectedIndex = selectedError.map(errors::indexOf).orElse(-1);
         selectError(errors.get(Math.floorMod(selectedIndex + 1, errors.size())));
     }
 
     @Override
     public void menuItemPreviousErrorSelected(ActionEvent e) {
-        List<ParseError> errors = parseResult.get().getErrors();
+        List<EditorError> errors = parseResult.get().getErrors();
         int selectedIndex = selectedError.map(errors::indexOf).orElse(errors.size());
         selectError(errors.get(Math.floorMod(selectedIndex - 1, errors.size())));
     }
