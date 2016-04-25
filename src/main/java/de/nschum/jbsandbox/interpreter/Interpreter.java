@@ -12,12 +12,24 @@ import java.util.List;
 public class Interpreter {
 
     private Writer outputWriter;
+    private volatile boolean cancelled;
 
     public Interpreter(Writer outputWriter) {
         this.outputWriter = outputWriter;
     }
 
-    public void execute(Program program) throws IOException, InterpreterRuntimeException {
+    public void cancel() {
+        cancelled = true;
+    }
+
+    private void checkIfCancelled() {
+        if (cancelled) {
+            throw new InterpreterCancelledException();
+        }
+    }
+
+    public void execute(Program program)
+            throws IOException, InterpreterRuntimeException, InterpreterCancelledException {
         State state = new State();
         for (Statement statement : program.getStatements()) {
             execute(statement, state);
@@ -26,6 +38,7 @@ public class Interpreter {
     }
 
     private void execute(Statement statement, State state) throws IOException {
+        checkIfCancelled();
         if (statement instanceof PrintStatement) {
             executePrintStatement((PrintStatement) statement);
         } else if (statement instanceof OutStatement) {
@@ -48,6 +61,7 @@ public class Interpreter {
     }
 
     private Value evaluateExpression(Expression expression, State state) {
+        checkIfCancelled();
         if (expression instanceof IntLiteral) {
             return evaluateInt((IntLiteral) expression);
         } else if (expression instanceof FloatLiteral) {
@@ -102,6 +116,7 @@ public class Interpreter {
         Type parameterType = expression.getFunction().getParameters().get(0).getType();
 
         return new Value(((Sequence) promote(input, inputType, parameterType.asSequence()).get()).map(value -> {
+            checkIfCancelled();
             return applyFunction(expression.getFunction(), state, value);
         }));
     }
@@ -115,6 +130,7 @@ public class Interpreter {
 
         Value reducedValue = promote(initialValue, expression.getInitialValue().getType(), parameterType);
         for (Value value : (Sequence) promote(input, inputType, parameterType.asSequence()).get()) {
+            checkIfCancelled();
             reducedValue = applyFunction(expression.getFunction(), state, reducedValue, value);
         }
         return reducedValue;

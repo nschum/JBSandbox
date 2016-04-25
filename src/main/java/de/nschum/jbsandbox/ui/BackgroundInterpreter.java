@@ -2,6 +2,7 @@ package de.nschum.jbsandbox.ui;
 
 import de.nschum.jbsandbox.ast.Program;
 import de.nschum.jbsandbox.interpreter.Interpreter;
+import de.nschum.jbsandbox.interpreter.InterpreterCancelledException;
 import de.nschum.jbsandbox.interpreter.InterpreterRuntimeException;
 import de.nschum.jbsandbox.source.SourceFile;
 
@@ -11,6 +12,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
@@ -23,16 +25,21 @@ import static java.util.Collections.emptyList;
 public class BackgroundInterpreter {
 
     private List<Consumer<InterpreterResult>> listeners = new ArrayList<>();
+    private Optional<Interpreter> previousInterpreter = Optional.empty();
     private int runCount = 0;
 
     void run(SourceFile sourceFile, Program program) {
         // main thread:
         final int currentRun = ++runCount;
+        cancel();
+
+        StringWriter stringWriter = new StringWriter();
+        Interpreter interpreter = new Interpreter(new BufferedWriter(stringWriter));
+
+        previousInterpreter = Optional.of(interpreter);
 
         CompletableFuture<InterpreterResult> future = CompletableFuture.supplyAsync(() -> {
-            StringWriter stringWriter = new StringWriter();
             try {
-                Interpreter interpreter = new Interpreter(new BufferedWriter(stringWriter));
                 interpreter.execute(program);
 
                 return new InterpreterResult(sourceFile, emptyList(), stringWriter.toString());
@@ -41,6 +48,8 @@ public class BackgroundInterpreter {
             } catch (InterpreterRuntimeException e) {
                 EditorError error = new EditorError(e.getMessage(), e.getLocation());
                 return new InterpreterResult(sourceFile, asList(error), stringWriter.toString());
+            } catch (InterpreterCancelledException e) {
+                throw e;
             }
         });
         future.thenAcceptAsync(interpreterResult -> {
@@ -52,6 +61,10 @@ public class BackgroundInterpreter {
                 }
             }
         }, SwingUtilities::invokeLater);
+    }
+
+    void cancel() {
+        previousInterpreter.ifPresent(Interpreter::cancel);
     }
 
     public void addResultListener(Consumer<InterpreterResult> consumer) {

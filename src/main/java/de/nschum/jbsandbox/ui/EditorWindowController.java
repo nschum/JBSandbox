@@ -41,6 +41,7 @@ public class EditorWindowController implements EditorWindow.Delegate {
     private void restartParse() {
         window.setParseResult(Optional.empty());
         window.setInterpreterResult(Optional.empty());
+        backgroundInterpreter.cancel();
         backgroundParser.parse(new SourceFile(window.getFileName(), new StringReader(window.getText())));
     }
 
