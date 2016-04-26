@@ -219,7 +219,8 @@ public class Interpreter {
 
     private Value applyFunction(Lambda function, State parentState, Value... arguments) {
 
-        State state = parentState.openNewScope();
+        // The function may access global variables.
+        State state = new State();
 
         // store arguments as variables
         List<Variable> parameters = function.getParameters();
