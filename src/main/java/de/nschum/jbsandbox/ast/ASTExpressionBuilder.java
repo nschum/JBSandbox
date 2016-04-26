@@ -65,7 +65,7 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
         final String variableName = identifierTree.getContent().get();
         Optional<Variable> referencedVariable = scope.lookUp(variableName);
         if (!referencedVariable.isPresent()) {
-            reportError(new UnresolvedVariableError("Unknown variable " + variableName, parserTree.getLocation()));
+            reportError(new UnresolvedVariableError("Unknown variable " + variableName, identifierTree.getLocation()));
         }
 
         return new Reference(referencedVariable.orElse(new Variable(Type.UNDETERMINED, variableName)),
