@@ -10,8 +10,8 @@ import java.util.stream.Stream;
  */
 public class IntRange implements Sequence {
 
-    private int lowerBound;
-    private int upperBound;
+    private final int lowerBound;
+    private final int upperBound;
 
     public IntRange(int lowerBound, int upperBound) {
         assert lowerBound <= upperBound;
@@ -26,12 +26,12 @@ public class IntRange implements Sequence {
 
     @Override
     public Value get(int i) {
-        return new Value(lowerBound + i);
+        return Value.of(lowerBound + i);
     }
 
     @Override
     public Stream<Value> stream() {
-        return IntStream.range(lowerBound, upperBound + 1).mapToObj(i -> new Value(i));
+        return IntStream.range(lowerBound, upperBound + 1).mapToObj(i -> Value.of(i));
     }
 
 

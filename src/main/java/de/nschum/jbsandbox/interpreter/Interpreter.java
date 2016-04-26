@@ -5,6 +5,7 @@ import de.nschum.jbsandbox.ast.*;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
+import java.util.concurrent.CompletionException;
 
 /**
  * Executes a program defined by its abstract syntax tree
@@ -30,11 +31,19 @@ public class Interpreter {
 
     public void execute(Program program)
             throws IOException, InterpreterRuntimeException, InterpreterCancelledException {
-        State state = new State();
-        for (Statement statement : program.getStatements()) {
-            execute(statement, state);
+        try {
+            State state = new State();
+            for (Statement statement : program.getStatements()) {
+                execute(statement, state);
+            }
+            outputWriter.flush();
+        } catch (CompletionException e) {
+            if (e.getCause() instanceof RuntimeException) {
+                throw (RuntimeException) e.getCause();
+            } else {
+                throw e;
+            }
         }
-        outputWriter.flush();
     }
 
     private void execute(Statement statement, State state) throws IOException {
@@ -83,22 +92,22 @@ public class Interpreter {
     }
 
     private Value evaluateInt(IntLiteral expression) {
-        return new Value(expression.getContent());
+        return Value.of(expression.getContent());
     }
 
     private Value evaluateFloat(FloatLiteral expression) {
-        return new Value(expression.getContent());
+        return Value.of(expression.getContent());
     }
 
     private Value evaluateIntRange(IntRangeExpression expression, State state) {
-        int lowerBound = (Integer) evaluateExpression(expression.getLowerBound(), state).get();
-        int upperBound = (Integer) evaluateExpression(expression.getUpperBound(), state).get();
+        int lowerBound = evaluateExpression(expression.getLowerBound(), state).getIntValue();
+        int upperBound = evaluateExpression(expression.getUpperBound(), state).getIntValue();
 
         if (lowerBound > upperBound) {
             throw new InterpreterRuntimeException("Invalid range, lower bound is greater than upper bound",
                     expression.getLocation());
         }
-        return new Value(new IntRange(lowerBound, upperBound));
+        return Value.of(new IntRange(lowerBound, upperBound));
     }
 
     private Value evaluateParentheses(ParenthesizedExpression expression, State state) {
@@ -115,7 +124,7 @@ public class Interpreter {
         Type inputType = expression.getInput().getType();
         Type parameterType = expression.getFunction().getParameters().get(0).getType();
 
-        return new Value(((Sequence) promote(input, inputType, parameterType.asSequence()).get()).map(value -> {
+        return Value.of(((Sequence) promote(input, inputType, parameterType.asSequence()).get()).parallelMap(value -> {
             checkIfCancelled();
             return applyFunction(expression.getFunction(), state, value);
         }));
@@ -128,12 +137,14 @@ public class Interpreter {
         Type inputType = expression.getInput().getType();
         Type parameterType = expression.getFunction().getParameters().get(0).getType();
 
-        Value reducedValue = promote(initialValue, expression.getInitialValue().getType(), parameterType);
-        for (Value value : (Sequence) promote(input, inputType, parameterType.asSequence()).get()) {
+        Value promotedInitialValue = promote(initialValue, expression.getInitialValue().getType(), parameterType);
+        Sequence promotedInput = (Sequence) promote(input, inputType, parameterType.asSequence()).get();
+        Lambda function = expression.getFunction();
+
+        return promotedInput.reduce(promotedInitialValue, (v1, v2) -> {
             checkIfCancelled();
-            reducedValue = applyFunction(expression.getFunction(), state, reducedValue, value);
-        }
-        return reducedValue;
+            return applyFunction(function, state, v1, v2);
+        });
     }
 
     private Value evaluateOperation(OperationExpression expression, State state) {
@@ -143,37 +154,37 @@ public class Interpreter {
         Type type = lhsType.equals(Type.FLOAT) ? Type.FLOAT : rhsType;
 
         // promote type for mixed operations
-        Object lhs = promote(evaluateExpression(expression.getLeftHandSide(), state), lhsType, type).get();
-        Object rhs = promote(evaluateExpression(expression.getRightHandSide(), state), rhsType, type).get();
+        Value lhs = promote(evaluateExpression(expression.getLeftHandSide(), state), lhsType, type);
+        Value rhs = promote(evaluateExpression(expression.getRightHandSide(), state), rhsType, type);
 
         if (type.equals(Type.FLOAT)) {
             switch (expression.getOperation()) {
                 case PLUS:
-                    return new Value((Double) lhs + (Double) rhs);
+                    return Value.of(lhs.getFloatValue() + rhs.getFloatValue());
                 case MINUS:
-                    return new Value((Double) lhs - (Double) rhs);
+                    return Value.of(lhs.getFloatValue() - rhs.getFloatValue());
                 case MULTIPLY:
-                    return new Value((Double) lhs * (Double) rhs);
+                    return Value.of(lhs.getFloatValue() * rhs.getFloatValue());
                 case DIVIDE:
-                    return new Value((Double) lhs / (Double) rhs);
+                    return Value.of(lhs.getFloatValue() / rhs.getFloatValue());
                 case EXP:
-                    return new Value(Math.pow((Double) lhs, (Double) rhs));
+                    return Value.of(Math.pow(lhs.getFloatValue(), rhs.getFloatValue()));
             }
         } else {
             switch (expression.getOperation()) {
                 case PLUS:
-                    return new Value((Integer) lhs + (Integer) rhs);
+                    return Value.of(lhs.getIntValue() + rhs.getIntValue());
                 case MINUS:
-                    return new Value((Integer) lhs - (Integer) rhs);
+                    return Value.of(lhs.getIntValue() - rhs.getIntValue());
                 case MULTIPLY:
-                    return new Value((Integer) lhs * (Integer) rhs);
+                    return Value.of(lhs.getIntValue() * rhs.getIntValue());
                 case DIVIDE:
-                    if ((Integer) rhs == 0) {
+                    if (rhs.getIntValue() == 0) {
                         throw new InterpreterRuntimeException("Division by zero", expression.getLocation());
                     }
-                    return new Value((Integer) lhs / (Integer) rhs);
+                    return Value.of(lhs.getIntValue() / rhs.getIntValue());
                 case EXP:
-                    return new Value(pow((Integer) lhs, (Integer) rhs));
+                    return Value.of(pow(lhs.getIntValue(), rhs.getIntValue()));
             }
         }
         throw new IllegalArgumentException();
@@ -198,9 +209,9 @@ public class Interpreter {
         if (from.equals(to)) {
             return value;
         } else if (from.equals(Type.INT) && to.equals(Type.FLOAT)) {
-            return new Value((double) ((Integer) value.get()));
+            return Value.of((double) value.getIntValue());
         } else if (from.isSequence() && to.isSequence()) {
-            return new Value(((Sequence) (value.get())).map(v -> promote(v, from.getInnerType(), to.getInnerType())));
+            return Value.of(((Sequence) (value.get())).map(v -> promote(v, from.getInnerType(), to.getInnerType())));
         } else {
             throw new IllegalArgumentException("Cannot convert " + from + " to " + to);
         }

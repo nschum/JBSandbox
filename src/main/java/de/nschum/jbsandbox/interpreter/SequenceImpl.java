@@ -12,7 +12,7 @@ import static java.util.stream.Collectors.joining;
  */
 class SequenceImpl implements Sequence {
 
-    private List<Value> values;
+    final private List<Value> values;
 
     public SequenceImpl(List<Value> values) {
         assert values != null;
