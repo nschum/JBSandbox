@@ -78,9 +78,9 @@ class ExpressionEvaluator {
         Type inputType = expression.getInput().getType();
         Type parameterType = expression.getFunction().getParameters().get(0).getType();
 
-        return Value.of(((Sequence) promote(input, inputType, parameterType.asSequence()).get()).parallelMap(value -> {
+        return Value.of(((Sequence) promote(input, inputType, parameterType.asSequence()).get()).map(value -> {
             checkIfCancelled();
-            return applyFunction(expression.getFunction(), state, value);
+            return applyFunction(expression.getFunction(), value);
         }));
     }
 
@@ -97,7 +97,7 @@ class ExpressionEvaluator {
 
         return promotedInput.reduce(promotedInitialValue, (v1, v2) -> {
             checkIfCancelled();
-            return applyFunction(function, state, v1, v2);
+            return  applyFunction(function, v1, v2);
         });
     }
 
@@ -171,9 +171,13 @@ class ExpressionEvaluator {
         }
     }
 
-    private Value applyFunction(Lambda function, State parentState, Value... arguments) {
+    /**
+     * Evaluate a function with given arguments
+     * <p/>
+     * Functions do not access global variables and can therefore be parallelized.
+     */
+    private Value applyFunction(Lambda function, Value... arguments) {
 
-        // The function may not access global variables.
         State state = new State();
 
         // store arguments as variables
