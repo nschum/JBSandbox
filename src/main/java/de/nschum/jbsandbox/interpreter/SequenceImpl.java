@@ -25,11 +25,6 @@ class SequenceImpl implements Sequence {
     }
 
     @Override
-    public Value get(int i) {
-        return values.get(i);
-    }
-
-    @Override
     public Stream<Value> stream() {
         return values.stream();
     }

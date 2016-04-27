@@ -1,7 +1,6 @@
 package de.nschum.jbsandbox.interpreter;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BinaryOperator;
@@ -13,11 +12,9 @@ import static java.util.stream.Collectors.toList;
 /**
  * A sequence of values
  */
-public interface Sequence extends Iterable<Value> {
+public interface Sequence {
 
     int size();
-
-    Value get(int i);
 
     default Sequence map(Function<? super Value, ? extends Value> function) {
         return new SequenceImpl(stream().map(function).collect(toList()));
@@ -61,11 +58,5 @@ public interface Sequence extends Iterable<Value> {
                 .reduce(initialValue, function);
     }
 
-
     Stream<Value> stream();
-
-    @Override
-    default Iterator<Value> iterator() {
-        return stream().iterator();
-    }
 }
