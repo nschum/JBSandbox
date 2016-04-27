@@ -5,6 +5,9 @@ import de.nschum.jbsandbox.source.SourceRange;
 import java.util.List;
 import java.util.function.Consumer;
 
+/**
+ * An expression that maps a sequence to another sequence by applying a function to each item
+ */
 public class MapExpression extends Expression {
 
     private final Expression input;

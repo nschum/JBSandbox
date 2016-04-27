@@ -5,10 +5,13 @@ import de.nschum.jbsandbox.source.SourceRange;
 import java.util.List;
 import java.util.function.Consumer;
 
+/**
+ * Code representing a first order function
+ */
 public class Lambda extends SyntaxTree {
 
-    private List<Variable> parameters;
-    private Expression expression;
+    private final List<Variable> parameters;
+    private final Expression expression;
 
     public Lambda(List<Variable> parameters, Expression expression, List<Terminal> terminals, SourceRange location) {
         super(terminals, location);

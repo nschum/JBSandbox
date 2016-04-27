@@ -12,7 +12,7 @@ public enum Operation {
      * <p>
      * A higher precedence means the operation is executed first.
      */
-    private int precedence;
+    private final int precedence;
 
     Operation(int precedence) {
         this.precedence = precedence;

@@ -5,11 +5,14 @@ import de.nschum.jbsandbox.source.SourceRange;
 import java.util.List;
 import java.util.function.Consumer;
 
+/**
+ * An expression that reduces a sequence to a single value by iterating over it and combining the values
+ */
 public class ReduceExpression extends Expression {
 
-    private Expression input;
-    private Expression initialValue;
-    private Lambda function;
+    private final Expression input;
+    private final Expression initialValue;
+    private final Lambda function;
 
     public ReduceExpression(Type type, Expression input, Expression initialValue, Lambda function,
                             List<Terminal> terminals, SourceRange location) {

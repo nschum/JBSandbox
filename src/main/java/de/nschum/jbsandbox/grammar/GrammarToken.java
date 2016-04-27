@@ -2,8 +2,8 @@ package de.nschum.jbsandbox.grammar;
 
 public class GrammarToken {
 
-    private String name;
-    private boolean terminal;
+    private final String name;
+    private final boolean terminal;
 
     public static GrammarToken terminal(String name) {
         return new GrammarToken(name, true);
@@ -25,7 +25,7 @@ public class GrammarToken {
 
     /**
      * Return if this is a token is a terminal, i.e. appears in the scanned input
-     * <p>
+     * <p/>
      * A non-terminal is only used in the grammar.
      */
     public boolean isTerminal() {

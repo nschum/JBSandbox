@@ -4,9 +4,12 @@ import de.nschum.jbsandbox.source.SourceRange;
 
 import java.util.Collections;
 
+/**
+ * A literal value of type INT
+ */
 public class IntLiteral extends Expression {
 
-    private int content;
+    private final int content;
 
     public IntLiteral(int content, SourceRange location) {
         super(Type.INT, Collections.emptyList(), location);

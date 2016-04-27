@@ -12,7 +12,7 @@ import java.util.function.Consumer;
  */
 public class ParenthesizedExpression extends Expression {
 
-    private Expression expression;
+    private final Expression expression;
 
     public ParenthesizedExpression(Expression expression, List<Terminal> terminals, SourceRange location) {
         super(expression.getType(), terminals, location);

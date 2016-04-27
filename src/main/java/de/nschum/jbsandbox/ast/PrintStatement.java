@@ -4,9 +4,12 @@ import de.nschum.jbsandbox.source.SourceRange;
 
 import java.util.List;
 
+/**
+ * Statement that outputs a static string
+ */
 public class PrintStatement extends Statement {
 
-    private String string;
+    private final String string;
 
     public PrintStatement(String string, List<Terminal> terminals, SourceRange location) {
         super(terminals, location);

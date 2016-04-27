@@ -1,9 +1,14 @@
 package de.nschum.jbsandbox.ast;
 
+/**
+ * A handle for variables used in Declarations, References and Lambdas
+ * <p/>
+ * While variables are assigned a value on execution, these handles are immutable.
+ */
 public class Variable {
 
-    private Type type;
-    private String name;
+    private final Type type;
+    private final String name;
 
     public Variable(Type type, String name) {
         this.type = type;
