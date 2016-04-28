@@ -219,7 +219,7 @@ public class Interpreter {
 
     private Value applyFunction(Lambda function, State parentState, Value... arguments) {
 
-        // The function may access global variables.
+        // The function may not access global variables.
         State state = new State();
 
         // store arguments as variables
