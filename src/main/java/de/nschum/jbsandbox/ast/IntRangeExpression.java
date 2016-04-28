@@ -5,10 +5,13 @@ import de.nschum.jbsandbox.source.SourceRange;
 import java.util.List;
 import java.util.function.Consumer;
 
+/**
+ * A literal value of type INT[] containing sequential values
+ */
 public class IntRangeExpression extends Expression {
 
-    private Expression lowerBound;
-    private Expression upperBound;
+    private final Expression lowerBound;
+    private final Expression upperBound;
 
     public IntRangeExpression(Expression lowerBound, Expression upperBound, List<Terminal> terminals,
                               SourceRange location) {

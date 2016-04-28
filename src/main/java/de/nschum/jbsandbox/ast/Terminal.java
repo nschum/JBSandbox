@@ -6,9 +6,15 @@ import de.nschum.jbsandbox.source.SourceRange;
 import java.util.Collections;
 import java.util.function.Consumer;
 
+/**
+ * Represents keywords, operators, parentheses or braces.
+ * <p/>
+ * Terminals have no further semantics, but are useful to have in the syntax tree for tool support
+ * (e.g. syntax highlighting).
+ */
 public class Terminal extends SyntaxTree {
 
-    private GrammarToken token;
+    private final GrammarToken token;
 
     public Terminal(GrammarToken token, SourceRange location) {
         super(Collections.emptyList(), location);

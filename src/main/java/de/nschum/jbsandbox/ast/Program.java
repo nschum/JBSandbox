@@ -8,9 +8,12 @@ import java.util.function.Consumer;
 
 import static java.util.stream.Collectors.joining;
 
+/**
+ * A collection of statements that make a full program
+ */
 public class Program extends SyntaxTree {
 
-    private List<Statement> statements;
+    private final List<Statement> statements;
 
     public Program(List<Statement> statements, SourceRange location) {
         super(Arrays.asList(), location);

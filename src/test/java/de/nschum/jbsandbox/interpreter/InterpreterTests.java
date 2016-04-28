@@ -251,7 +251,7 @@ public class InterpreterTests {
     @Test(expected = InterpreterCancelledException.class)
     public void shouldSupportCancellation() throws Exception {
         // given
-        Program syntaxTree = parse("var n = 50000000 var sequence = map({0, n}, i -> (-1)^i)");
+        Program syntaxTree = parse("var n = 50000000 var sequence = map({0, n}, i -> (-1)^i) out sequence");
         StringWriter output = new StringWriter();
         Interpreter interpreter = new Interpreter(new BufferedWriter(output));
 

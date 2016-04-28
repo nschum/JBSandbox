@@ -5,7 +5,7 @@ import java.util.stream.Stream;
 
 /**
  * A sequence of consecutive ints
- * <p>
+ * <p/>
  * This only requires storage of O(1) for n consecutive ints.
  */
 public class IntRange implements Sequence {
@@ -22,11 +22,6 @@ public class IntRange implements Sequence {
     @Override
     public int size() {
         return upperBound - lowerBound + 1;
-    }
-
-    @Override
-    public Value get(int i) {
-        return Value.of(lowerBound + i);
     }
 
     @Override

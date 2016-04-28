@@ -9,14 +9,15 @@ import java.util.function.Consumer;
  * The abstract syntax tree
  * <p/>
  * While the ParserTree represents the grammar structure, this tree represents the semantic structure of a program.
+ * The entire tree is immutable.
  */
 public abstract class SyntaxTree {
 
-    private SourceRange location;
+    private final SourceRange location;
     /**
      * The terminal symbols (i.e. keywords, operators)
      */
-    private List<Terminal> terminals;
+    private final List<Terminal> terminals;
 
     protected SyntaxTree(List<Terminal> terminals, SourceRange location) {
         this.location = location;

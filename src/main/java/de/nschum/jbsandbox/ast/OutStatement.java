@@ -5,9 +5,12 @@ import de.nschum.jbsandbox.source.SourceRange;
 import java.util.List;
 import java.util.function.Consumer;
 
+/**
+ * Statement that outputs a variable
+ */
 public class OutStatement extends Statement {
 
-    private Expression expression;
+    private final Expression expression;
 
     public OutStatement(Expression expression, List<Terminal> terminals, SourceRange location) {
         super(terminals, location);

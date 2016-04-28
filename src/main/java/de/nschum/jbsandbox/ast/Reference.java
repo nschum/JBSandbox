@@ -4,9 +4,12 @@ import de.nschum.jbsandbox.source.SourceRange;
 
 import java.util.List;
 
+/**
+ * An expression referencing the value of a previously declared variable
+ */
 public class Reference extends Expression {
 
-    private Variable variable;
+    private final Variable variable;
 
     public Reference(Variable variable, List<Terminal> terminals, SourceRange location) {
         super(variable.getType(), terminals, location);

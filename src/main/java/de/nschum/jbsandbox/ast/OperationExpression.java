@@ -5,11 +5,14 @@ import de.nschum.jbsandbox.source.SourceRange;
 import java.util.List;
 import java.util.function.Consumer;
 
+/**
+ * An expression that applies an operation to two operands
+ */
 public class OperationExpression extends Expression {
 
-    private Expression leftHandSide;
-    private Expression rightHandSide;
-    private Operation operation;
+    private final Expression leftHandSide;
+    private final Expression rightHandSide;
+    private final Operation operation;
 
     public OperationExpression(Type type, Expression leftHandSide, Expression rightHandSide, Operation operation,
                                List<Terminal> terminals) {

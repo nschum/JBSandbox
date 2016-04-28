@@ -4,9 +4,12 @@ import de.nschum.jbsandbox.source.SourceRange;
 
 import java.util.Collections;
 
+/**
+ * A literal value of type FLOAT
+ */
 public class FloatLiteral extends Expression {
 
-    private double content;
+    private final double content;
 
     public FloatLiteral(double content, SourceRange location) {
         super(Type.FLOAT, Collections.emptyList(), location);
