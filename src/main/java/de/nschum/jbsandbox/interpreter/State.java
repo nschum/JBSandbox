@@ -5,22 +5,19 @@ import de.nschum.jbsandbox.util.TinyMap;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * The program's state
  */
 public class State {
 
-    private Optional<State> parent;
     private Map<Variable, Value> values = new TinyMap<>();
 
     public State() {
-        parent = Optional.empty();
     }
 
     private State(State parent) {
-        this.parent = Optional.of(parent);
+        values.putAll(parent.values);
     }
 
     /**
@@ -31,9 +28,6 @@ public class State {
         Value value = values.get(variable);
         if (value != null) {
             return value;
-        }
-        if (parent.isPresent()) {
-            return parent.get().lookUp(variable);
         }
         throw new IllegalArgumentException("No such variable: " + variable);
     }

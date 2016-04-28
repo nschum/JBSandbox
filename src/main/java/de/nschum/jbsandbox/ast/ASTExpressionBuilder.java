@@ -258,13 +258,17 @@ public class ASTExpressionBuilder extends ASTBaseBuilder {
     }
 
     private Expression parseNumber(ParserTree numberTree, int factor) {
-        Expression result;
         final String content = numberTree.getContent().get();
         if (content.contains(".")) {
-            result = new FloatLiteral(Double.parseDouble(content) * factor, numberTree.getLocation());
+            return new FloatLiteral(Double.parseDouble(content) * factor, numberTree.getLocation());
         } else {
-            result = new IntLiteral(Integer.parseInt(content) * factor, numberTree.getLocation());
+            try {
+                return new IntLiteral(Integer.parseInt(content) * factor, numberTree.getLocation());
+            } catch (NumberFormatException e) {
+                reportError(new IllegalNumberError("Number " + content + " is not a valid INT",
+                        numberTree.getLocation()));
+                return new IntLiteral(0, numberTree.getLocation());
+            }
         }
-        return result;
     }
 }

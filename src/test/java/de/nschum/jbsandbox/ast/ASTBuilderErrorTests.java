@@ -82,4 +82,10 @@ public class ASTBuilderErrorTests extends ASTBuilderBaseTests {
         assertThat(astBuilder.getErrors(), contains(error(UnresolvedVariableError.class, 0, 4, 0, 5)));
     }
 
+    @Test
+    public void shouldNotAllowLongs() throws Exception {
+        parseExpression("99999999999999999999999");
+
+        assertThat(astBuilder.getErrors(), contains(error(IllegalNumberError.class, 0, 4, 0, 27)));
+    }
 }
